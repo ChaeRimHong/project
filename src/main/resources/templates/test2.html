@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>norisystem HRM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" th:href="@{/css/test.css?after}" />
+
+</head>
+<body>
+<!-- -------------------------------------main 부분------------------------------------- -->
+<div class="container" style="padding-top: 50px; padding-bottom: 50px;" id="wrap">
+    <div class="row" style="text-align: center;">
+    <br>
+        <div class="col-md-4 form-group">
+            <!-- 사업부 -->
+            <button type="button" class="btn btn-default" id="bus" onclick="toggleDiv(event, 'Div_bus')">사업부</button>
+            <div class="dropdown-content table table-hover" id="Div_bus" style="font-size:12px; width: 250px;">
+              <ul class="">
+                <li class="form-control checkbox-label" th:each="bus : ${busstandard}" style="padding-right: 10px; border: 0px">
+                  <input type="checkbox" th:id="${bus.gbn_detail}" th:value="${bus.gbn_detail}" onchange="updateButtonLabel('Div_bus', 'bus')"/>&nbsp;
+                  <label th:for="${bus.gbn_detail}" th:text="${bus.gbn_name}"></label>
+                </li>
+              </ul>
+            </div>
+        </div>
+        <div class="col-md-4 form-group">
+            <!-- 부서 -->
+            <button type="button" class="btn btn-default" id="gro" onclick="toggleDiv(event, 'Div_gro')">부서</button>
+            <div class="dropdown-content table table-hover" id="Div_gro" style="font-size:12px; width: 250px;">
+              <ul class="">
+                <li class="form-control checkbox-label" th:each="gro : ${grostandard}" style="padding-right: 10px; border: 0px; display: none;">
+                  <input type="checkbox" th:id="${gro.gbn_detail}" th:value="${gro.gbn_detail}" onchange="updateButtonLabel('Div_gro', 'gro')"/>&nbsp;
+                  <label th:for="${gro.gbn_detail}" th:text="${gro.gbn_name}"></label>
+                </li>
+              </ul>
+            </div>
+        </div>
+        <div class="col-md-3 form-group">
+            <div class="col-md-8" style="padding-top: 3px;">
+                <input type="text" class="form-control"  id="searchInput" style="display: inline-block; width: auto;" placeholder="이름을 입력하세요">
+            </div>
+            <div class="col-md-4" style="padding-top: 3px; padding-left: 60px">
+                <button class="btn btn-info" id="searchButton" style="font-weight: bold; vertical-align: middle;">검색</button>
+            </div>
+        </div>
+        <div class="col-md-1 form-group" style="padding-top: 3px">
+            <a th:href="@{/board}" class="btn btn-primary" style="font-weight: bold;">신규</a>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div id="show">
+        <table class="table table-hover">
+          <br><br><br>
+          <thead>
+            <tr>
+              <th>사번</th>
+              <th>이름</th>
+              <th>사업부</th>
+              <th>부서명</th>
+              <th>직무</th>
+              <th>직급</th>
+              <th>직책</th>              
+              <th>휴대폰</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTableBody">
+          </tbody>
+        </table>
+        </div>
+    <div class="col-md-1"></div>
+    </div>
+</div>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var employees = /*[[${employees}]]*/ [];
+    /*]]>*/
+
+  // 사업부,부서를 클릭했을 때
+    function toggleDiv(event, divId) {
+      var div = document.getElementById(divId);
+      if (div.classList.contains('show')) {
+        div.classList.remove('show');
+      } else {
+        div.classList.add('show');
+      }
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.matches('.btn') && !event.target.matches('input[type="checkbox"]') && !event.target.matches('label')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+
+ // 사업부를 체크하고 그에 맞는 부서 가져오기
+    function updateButtonLabel(divId, buttonId) {
+      var checkboxes = document.querySelectorAll('#' + divId + ' input[type="checkbox"]');
+      var selected = [];
+      checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+          selected.push(checkbox.id); // 체크된 체크박스의 ID(gbn_detail 값)를 가져옴
+        }
+      });
+
+      // 콘솔에 선택된 값 출력
+      selected.forEach(function(value, index) {
+        console.log('Index:', index, 'Value:', value);
+      });
+
+      // 콘솔에 선택된 값 출력
+      console.log('Selected values for ' + buttonId + ':', selected+"\n");
+
+      var button = document.getElementById(buttonId);
+      if (selected.length > 0) {
+        button.innerHTML = selected.map(function(item) {
+          // gbn_detail 값을 버튼에 표시할 때 gbn_name으로 변경
+          var gbn_name = document.querySelector('#' + item + ' + label').innerText;
+          return '<span class="selected-item">' + gbn_name + '</span>';
+        }).join('');
+      } else {
+        button.innerText = buttonId === 'bus' ? '사업부' : '부서';
+      }
+
+      // 사업부에 따라 부서 드롭다운 업데이트
+      if (buttonId === 'bus') {
+        var groDropdown = document.getElementById('Div_gro');
+        var busSelected = selected.map(function(item) {
+          return item.charAt(0); // 사업부 코드 (예: 'f', 'i', 's', 't')
+        });
+        var groOptions = groDropdown.querySelectorAll('input[type="checkbox"]');
+        groOptions.forEach(function(option) {
+          var busCode = option.id.charAt(0); // 부서의 사업부 코드
+          if (busSelected.includes(busCode)) {
+            option.parentNode.style.display = 'block'; // 해당 사업부에 속하는 부서 표시
+          } else {
+            option.parentNode.style.display = 'none'; // 해당 사업부에 속하지 않는 부서 숨김
+          }
+        });
+      }
+
+      // 선택된 사업부에 해당하는 데이터를 테이블에 업데이트
+      // updateTable(selected);
+    }
+
+///////////////////////////////////////////사업부///////////////////////////////////////////
+    function updateDepartments() {
+        // 선택된 사업부의 값 배열로 가져오기
+        var checkboxes = document.querySelectorAll("#Div_bus input[type='checkbox']:checked");
+        var selectedBusinessUnits = Array.from(checkboxes).map(function(checkbox) {
+            return checkbox.value;
+        });
+
+        // 선택된 사업부에 해당하는 사원 데이터 가져오기
+        var employees = /*[[${employees}]]*/ [];
+        var filteredEmployees = employees.filter(function(employee) {
+            return selectedBusinessUnits.includes(employee.dept_biz);
+        });
+
+        // 테이블의 tbody 엘리먼트 찾기
+        var tbody = document.getElementById("employeeTableBody");
+
+        // tbody 내용 비우기
+        tbody.innerHTML = "";
+
+        // 사원 데이터를 테이블에 추가하기
+        filteredEmployees.forEach(function(employee) {
+            var tr = document.createElement("tr");
+            tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
+            tbody.appendChild(tr);
+        });
+
+        // 부서 선택 창 업데이트
+        var departmentSelect = document.getElementById("gro");
+        departmentSelect.innerHTML = "<option value='부서' th:placeholder='부서'>부서</option>";
+        var seen = {};
+        filteredEmployees.forEach(function(employee) {
+            if (!seen[employee.dept_group]) {
+                var option = document.createElement("option");
+                option.value = employee.dept_group;
+                option.text = employee.dept_group;
+                departmentSelect.appendChild(option);
+                seen[employee.dept_group] = true;
+            }
+        });
+
+        // 사업부를 선택했을 때 테이블 표시
+        document.getElementById("show").style.display = "block";
+    }
+
+    ///////////////////////////////////////////부서///////////////////////////////////////////
+    function updateEmployees() {
+        // 선택된 부서의 값 가져오기
+        var selectedDepartment = document.getElementById("gro").value;
+
+        // 선택된 사업부의 값 배열로 가져오기
+        var checkboxes = document.querySelectorAll("#Div_bus input[type='checkbox']:checked");
+        var selectedBusinessUnits = Array.from(checkboxes).map(function(checkbox) {
+            return checkbox.value;
+        });
+
+        // 선택된 사업부와 부서에 해당하는 사원 데이터 가져오기
+        var employees = /*[[${employees}]]*/ [];
+        var filteredEmployees = employees.filter(function(employee) {
+            return selectedBusinessUnits.includes(employee.dept_biz) && employee.dept_group === selectedDepartment;
+        });
+
+        // 테이블의 tbody 엘리먼트 찾기
+        var tbody = document.getElementById("employeeTableBody");
+
+        // tbody 내용 비우기
+        tbody.innerHTML = "";
+
+        // 사원 데이터를 테이블에 추가하기
+        filteredEmployees.forEach(function(employee) {
+            var tr = document.createElement("tr");
+            tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
+                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
+            tbody.appendChild(tr);
+        });
+    }
+
+
+</script>
+</body>
+</html>
+

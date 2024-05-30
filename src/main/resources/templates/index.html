@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>norisystem HRM</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:700,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="">
+    <style>
+        /* 추가된 CSS */
+        .hide {
+            display: none;
+        }
+        *{
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+        body{
+            width: 100%;
+            height: 80vh;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start; /* 로고를 상단에 정렬 */
+        }
+        .login-wrapper{
+            width: 400px;
+            height: 350px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .login-wrapper > h2{
+            font-size: 24px;
+            color: #6A24FE;
+            margin-bottom: 20px;
+        }
+        .image-wrapper {
+            text-align: center;
+            position: relative; /* 로고 위치를 상대적으로 설정 */
+            padding-bottom: 50px; /* 로고 위로 100px만큼 여유 공간을 둠 */
+            opacity: 0; /* 로고를 처음에는 보이지 않게 설정 */
+            transition: opacity 1s ease, transform 1s ease; /* opacity와 transform에 1초 동안의 transition 설정 */
+            transform: translateY(-70px); /* 로고를 처음에는 창의 절반만큼 위로 이동시켜 숨김 */
+        }
+        .image-wrapper img {
+            position: absolute; /* 로고 이미지를 절대적으로 설정 */
+            top: 100px; /* 로고를 상단에 위치시킴 */
+            left: 50%; /* 가운데 정렬 */
+            transform: translateX(-50%); /* 가운데 정렬을 위한 변형 */
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .menu-wrapper {
+            text-align: center;
+            position: absolute; /* 메뉴 위치를 절대적으로 설정 */
+            top: calc(50% + 150px); /* 로고 위치 아래에 위치하도록 조정 */
+            left: 50%; /* 가운데 정렬 */
+            transform: translateX(-50%); /* 가운데 정렬을 위한 변형 */
+            opacity: 0; /* 메뉴를 처음에는 보이지 않게 설정 */
+            transition: opacity 1s ease; /* opacity에 1초 동안의 transition 설정 */
+        }
+        .menu-wrapper.show {
+            opacity: 1; /* 메뉴가 나타날 때의 opacity 설정 */
+        }
+        /* 로고가 나타나는 애니메이션 설정 */
+        .image-wrapper.show {
+            opacity: 1; /* 로고가 나타날 때의 opacity 설정 */
+            transform: translateY(-30px); /* 로고가 위로 80px 올라가는 애니메이션 설정 */
+        }
+        /* 각 블록 스타일 */
+        .menu-block {
+            width: 200px;
+            height: 200px;
+            margin: 60px 60px 20px 60px;
+            color: #fff;
+            font-size: 18px;
+            line-height: 100px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .menu-block:hover {
+            background-color: #f0b775;
+        }
+        /* 그리드 레이아웃 설정 */
+        .menu-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="image-wrapper text-center">
+                    <img src="image/nori.png" alt="logo" style="padding-bottom: 20px;"> 
+                </div>
+<div class="menu-wrapper">
+    <!-- 상위 메뉴 블록 그리드 -->
+    <div class="menu-row">
+
+        <a th:href="@{/main}">
+            <img src="image/hr.png" alt="인사" class="menu-block">
+            <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">인사</span>
+        </a>
+        <a th:href="@{/assign}">
+            <img src="image/busi1.png" alt="사업관리" class="menu-block"  >
+            <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">사업관리</span>
+        </a>
+    </div>
+    <!-- 하위 메뉴 블록 그리드 -->
+    <div class="menu-row">
+        <a th:href="@{/screen4}">
+            <img src="image/analysis.png" alt="통계" class="menu-block">
+            <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">통계현황</span>
+        </a>
+        <a th:href="@{/screen2}">
+            <img src="image/edu.png" alt="교육" class="menu-block">
+            <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">교육</span>
+        </a>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                $(".image-wrapper").addClass("show"); // 2초 후에 로고가 나타나는 클래스 추가
+                setTimeout(function() {
+                    $(".menu-wrapper").addClass("show"); // 로고가 나타난 후 1초 후에 메뉴 선택 칸 표시
+                }, 500);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

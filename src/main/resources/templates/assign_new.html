@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>norisystem HRM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  
+  <link rel="stylesheet" th:href="@{/css/assign_new.css?after}" />
+  <script type="text/javascript" th:src="@{/js/assign_new.js?after}"></script>
+
+</head>
+<body>
+<!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
+<nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+      <a class="navbar-brand" th:href="@{/main}" style="font-weight: bold; color: orange;">norisystem</a>
+      </div>
+      <ul class="nav navbar-nav">
+          <!-- 사원관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                사원관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a th:href="@{/main}"  >사원관리</a></li>
+              </ul>
+          </li>
+          <!-- 사업관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                  사업관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/assign}"  >과제관리</a></li>
+              </ul>
+          </li>
+          <!-- 교육관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                교육관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/#}"  >교육이수</a></li>
+              </ul>
+          </li>
+          <!-- 통계현황 -->
+          <li><a th:href="@{/#}"  >통계현황</a></li>
+          <!-- 기준관리 -->
+          <li><a th:href="@{/code}"  >기준관리</a></li>
+          <!-- test -->
+          <li><a th:href="@{/test}"  >test</a></li>
+      </ul>
+      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
+          <button class="btn btn-link" style="float: right; color: lightskyblue;">
+              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
+          </button>
+      </form>
+    </div>
+  </nav>
+<!-- -------------------------------------main 부분------------------------------------- -->
+
+<div class="container" style="padding-top: 50px; padding-bottom: 50px;">
+    <form id="taskForm" th:action="@{/addTask}" method="post" enctype="multipart/form-data">
+        <!-- 과제코드/과제명 -->
+        <div class="row" style="">
+            <!-- 과제코드 -->
+            <div class="col-md-6">
+                <div class="input-block">
+                    <!-- 자동으로 입력되는 년월일 시분을 표시할 input 필드 -->
+                    <input type="text" name="pm_code" id="pm_code_date" required spellcheck="false"
+                    style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">과제코드</span>
+                </div><br>
+            </div>
+            <div class="col-md-6">
+                <div class="input-block">
+                    <input type="text" name="pm_name" id="pm_name" required spellcheck="false" >
+                    <span class="placeholder">과제명</span>
+                </div><br>
+            </div>
+        </div>
+        <!-- 담당자/부서/과제생성일 -->
+        <hr />
+        <div class="row" style="padding-top: 15px">      
+            <div class="col-md-1" style="text-align: right; vertical-align: middle;">
+                <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#pm_nori_manager_Modal">
+                    <span class="glyphicon glyphicon-user"></span> User 
+                </button>
+            </div>
+            <!-- 모달 -->
+            <div id="pm_nori_manager_Modal" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- 모달 내용 -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">사원 선택</h4>
+                        </div>
+                        <div class="modal-body">
+                            <!-- 
+                            <label for="deptFilter_pmmanager">부서 선택:</label>
+                                <select id="deptSelect" class="form-control">
+                                    <option value="">전체</option>
+                                    <option th:each="employees : ${employees}" th:value="${employees.dept_biz}" th:text="${employees.dept_biz}"></option>
+                                </select>
+                            <br>
+                             -->
+                            <input type="text" id="searchInput_pmamanager" class="form-control" placeholder="검색...">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>사번</th>
+                                        <th>성명</th>
+                                        <th>사업부</th>
+                                        <th>그룹명</th>
+                                        <th>직급</th>
+                                        <th>휴대전화</th>
+                                        <th>이메일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeList_pmmanager">
+                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
+                                    <tr th:each="employee : ${employees}">
+                                        <td></td>
+                                        <td th:text="${employee.emp_num}"></td>
+                                        <td th:text="${employee.name_kor}"></td>
+                                        <td th:text="${employee.dept_biz}"></td>
+                                        <td th:text="${employee.dept_group}"></td>
+                                        <td th:text="${employee.emp_rank}"></td>
+                                        <td th:text="${employee.phone}"></td>
+                                        <td th:text="${employee.mail}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="pm_nori_manager" id="pm_nori_manager" required spellcheck="false" 
+                    style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">담당자</span>
+                </div><br>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_nori_bu" id="pm_nori_bu" required spellcheck="false"
+                    style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">부서</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="date" name="pm_create_date" id="pm_create_date" required spellcheck="false" >
+                    <span class="placeholder">과제생성일</span>
+                </div>
+            </div>
+        </div>
+        <!-- 책임자/부서/고객사 -->
+        <div class="row" style="">
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_manager" id="pm_manager" required spellcheck="false" >
+                    <span class="placeholder">책임자(고객)</span>
+                </div><br>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_bu" id="pm_bu" required spellcheck="false" >
+                    <span class="placeholder">부서(고객)</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_business" id="pm_business" required spellcheck="false" >
+                    <span class="placeholder">고객사</span>
+                </div>
+            </div>
+        </div>
+        <!-- 공수/정규(명)/파트너(명) -->
+        <div class="row" style="">
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_full" id="pm_full" required spellcheck="false" >
+                    <span class="placeholder">정규(명)</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_part" id="pm_part" required spellcheck="false" >
+                    <span class="placeholder">파트너(명)</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_workload" id="pm_workload" spellcheck="false" 
+                     style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">공수</span>
+                </div><br>
+            </div>
+        </div>
+                <!-- 계약금액 -->
+        <div class="row" style="">
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_price" id="pm_price" required spellcheck="false" >
+                    <span class="placeholder">계약금액(원)</span>
+                </div><br>
+            </div>
+            <div class="col-md-4" style="visibility:hidden">
+                <div class="input-block">
+                    <input type="text" name="input-text" id="" spellcheck="false" >
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block" style="visibility:hidden">
+                    <input type="text" name="input-text" id="" spellcheck="false" >
+                </div>
+            </div>
+        </div>
+        <!-- 제안일/시작일/완료일/기간 -->
+        <hr />
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="date" name="pm_suggest_date" id="pm_suggest_date" spellcheck="false" >
+                    <span class="placeholder">제안일</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="date" name="pm_start_date" id="pm_start_date" spellcheck="false" >
+                    <span class="placeholder">시작일</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="date" name="pm_end_date" id="pm_end_date" spellcheck="false" >
+                    <span class="placeholder">완료일</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="pm_work_date" id="pm_work_date" spellcheck="false"
+                     style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">기간(월)</span>
+                </div>
+            </div>
+        </div>
+        <!-- 투입예정/확정유무 -->
+        <div class="row" style="">
+                <div class="input-block">
+                    <div class="col-md-6 form-group">
+                        <select name="pm_status" id="pm_status" class="form-control" required>
+                            <option value="상태" disabled selected >상태</option>
+                            <option value="투입">투입</option>
+                            <option value="투입예정">투입예정</option>
+                            <option value="대기">대기</option>
+                        </select>
+                        <span class="placeholder"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <select name="pm_outline" id="pm_outline" class="form-control" required>
+                            <option value="확정유무" disabled selected >확정유무</option>  
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                        <span class="placeholder"></span>
+                    </div>
+                </div>
+        </div>
+        <!-- 개요 -->
+        <hr />
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-12">
+                <div class="input-block form-group">
+                    <label for="comment" class="placeholder">개요 : </label>
+                    <textarea class="form-control" rows="5" id="pm_bego"></textarea>
+                </div><br>
+            </div>
+        </div>
+        <!-- 투입인력정보 -->
+        <div class="row" style="">
+            <div class="container">
+                <h5 style="font-weight: bold;">투입인력정보</h5>
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead class="input-block">
+                        <tr>
+                            <th>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
+                                    <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
+            
+                                </div>
+                            </th>
+                            <th>사번</th>
+                            <th>성명</th>
+                            <th>사업부</th>
+                            <th>그룹명</th>
+                            <th>직급</th>
+                            <th>휴대전화</th>
+                            <th>이메일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_sawon">
+                        <!-- 테이블 행 추가되는 부분 -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- 모달 -->
+            <div id="myModal" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- 모달 내용 -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">사원 선택</h4>
+                        </div>
+                        <div class="modal-body">
+                            <label for="deptFilter">부서 선택:</label>
+                            <select id="deptFilter" class="form-control">
+                                <option value="">전체</option> <!-- 전체 옵션 추가 -->
+                                <!-- 여기에 각 부서별 옵션을 추가하기 위한 JavaScript 코드가 들어갈 예정 -->
+                            </select>
+                            <br>
+                            <input type="text" id="searchInput" class="form-control" placeholder="검색...">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAll"></th>
+                                        <th>사번</th>
+                                        <th>성명</th>
+                                        <th>사업부</th>
+                                        <th>그룹명</th>
+                                        <th>직급</th>
+                                        <th>휴대전화</th>
+                                        <th>이메일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeList">
+                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
+                                    <tr th:each="employee : ${employees}">
+                                        <td><input type="checkbox"></td>
+                                        <td th:text="${employee.emp_num}"></td>
+                                        <td th:text="${employee.name_kor}"></td>
+                                        <td th:text="${employee.dept_biz}"></td>
+                                        <td th:text="${employee.dept_group}"></td>
+                                        <td th:text="${employee.emp_rank}"></td>
+                                        <td th:text="${employee.phone}"></td>
+                                        <td th:text="${employee.mail}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- 페이징 컨트롤 -->
+                            <ul class="pagination" id="pageContent">
+                                <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 특이사항 -->
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-12">
+                <div class="input-block form-group">
+                    <label for="comment" class="placeholder">특이사항 : </label>
+                    <textarea class="form-control" rows="5" id="comment"></textarea>
+                </div><br>
+            </div>
+        </div>
+        <!-- 엑셀첨부 -->
+        <div class="row" style="padding-top: 15px">
+        <div class="col-md-12">
+            <h5 style="font-weight: bold;">파일 업로드</h5>
+            <table class="table table-bordered table-hover" style="text-align: center;">
+                <thead class="input-block">
+                    <tr>
+                        <th>
+                            <div class="btn-group">
+                                <button id="addExcelRowButton" type="button" class="btn btn-primary" style="font-weight: bold;">+</button>
+                                <button id="deleteExcelRowButton" type="button" class="btn btn-danger" style="font-weight: bold;">-</button>
+                            </div>
+                        </th>
+                        <th>엑셀 파일</th>
+                    </tr>
+                </thead>
+                <tbody id="myTable_excel">
+                    <tr>
+                        <td><input type="radio" name="tableSelect_excel" value="myTable_excel"></td>
+                        <td class="input-block form-group">
+                            <input type="file" class="form-control-file" id="pm_file" name="fileUpload">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        <div class="row" style="padding-bottom: 50px; padding-top: 20px; display: flex; justify-content: center;">
+            <a th:href="@{/assign}" style="text-align: center;" class="btn btn-default" th:text="취소"></a>
+            <a th:href="@{/assign}" id="saveButton" style="text-align: center;" class="btn btn-default">저장</a>
+        </div>
+    </form>
+</div>
+
+</body>
+
+<div class="content" style="padding-bottom: 0;">
+<footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
+
+    <a class="text-muted">©norisystem Corp.</a><br>
+    <a th:href="@{http://www.norisystem.co.kr/}" target="_blank">Main Home / </a>
+    <a th:href="@{https://gw.norisystem.co.kr/ngw/app/#/}" target="_blank">GroupWare</a>
+    <br>
+
+</footer>
+</div>
+
+</body>
+</html>

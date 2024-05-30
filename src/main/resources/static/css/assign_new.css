@@ -1,0 +1,209 @@
+    /* 모달 너비를 조정하는 CSS */
+    .modal-lg {
+      width: 80%; /* 모달 너비를 80%로 조정 */
+    }
+    /* 드롭다운 너비 조정 */
+    .select-width {
+      max-width: 150px; /* 드롭다운의 최대 너비를 지정 */
+    }
+    
+    
+.btn-group {
+     display: flex;
+     justify-content: center;
+        
+ }
+.btn-group .btn {
+    font-weight: bold;
+}
+/* Remove the navbar's default margin-bottom and rounded borders */ 
+.navbar {
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+.row.content {height: 450px}
+
+/* Set gray background color and 100% height */
+.sidenav {
+  padding-top: 20px;
+  background-color: #f1f1f1;
+  height: 100%;
+  width: auto;
+}
+
+/* Set black background color, white text and some padding */
+footer {
+  text-align: center; 
+  padding-bottom: 0;
+  background-color: #e6e6e6ce;
+  color: black;
+  bottom:-100px;
+  width: 100%;
+  height: 60px;
+}
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+  .sidenav {
+    height: auto;
+    padding: 15px;
+  }
+  .row.content {height:auto;} 
+}
+
+table {
+  text-align: center;
+  border: 2px solidd lightsteelblue;
+}
+
+th {
+  /* font-size: bold; */
+  text-align: center;
+  border: 2px solidd lightsteelblue;
+}
+
+td {
+  border: 2px solidd lightsteelblue;
+  text-align: center;
+}
+
+div.input-block {
+  position: relative;
+  
+}
+div.input-block input {
+  vertical-align: middle;
+  font-weight: 400;
+  font-size: 1.4rem;
+  color: #495055;
+  width: 100%;
+  padding: 5px 5px;
+  border-radius: 1rem;
+  border: 2px solid lightsteelblue;
+  outline:none;
+  height: 35px;
+  font-weight: bold;
+  padding-left: 20px;
+}
+div.input-block span.placeholder {
+  margin-left: 20px;
+  vertical-align: middle;
+  position: absolute;
+  margin: 7px 0;
+  padding: 0 4px;
+  font-family: Roboto, sans-serif;
+  color:  #6c757d;
+  display: flex;
+  align-items: center;
+  font-size: 1.6rem;
+  top: 0;
+  left: 17px;
+  transition: all 0.4s;
+  transform-origin: 0% 0%;
+  background: none;
+  pointer-events: none;
+}
+    #pm_nori_bu:valid + span.placeholder,
+    #pm_nori_bu:focus + span.placeholder, 
+    #pm_create_date:valid + span.placeholder,
+    #pm_create_date:focus + span.placeholder, 
+    #pm_manager:valid + span.placeholder,
+    #pm_manager:focus + span.placeholder, 
+    #pm_bu:valid + span.placeholder,
+    #pm_bu:focus + span.placeholder,
+    #pm_business:valid + span.placeholder,
+    #pm_business:focus + span.placeholder,
+    #pm_full:valid + span.placeholder,
+    #pm_full:focus + span.placeholder,
+    #pm_part:valid + span.placeholder,
+    #pm_part:focus + span.placeholder,
+    #pm_workload:valid + span.placeholder,
+    #pm_workload:focus + span.placeholder,
+    #pm_price:valid + span.placeholder,
+    #pm_price:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(230px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+  vertical-align:middle;
+}
+
+    /* pm_code와 pm_name에 대한 개별 스타일링 */
+    #pm_code_date:not(:placeholder-shown) + span.placeholder,
+    #pm_code_date:focus + span.placeholder, 
+    #pm_name:not(:placeholder-shown) + span.placeholder,
+    #pm_name:focus + span.placeholder {
+      transform: scale(1.0) translateX(440px);
+      font-style: italic; /* 입력시 기울기기 글꼴 */
+    }
+    
+    /* pm_nori_manager에 대한 개별 스타일링 */
+    #pm_nori_manager:not(:placeholder-shown) + span.placeholder,
+    #pm_nori_manager:focus + span.placeholder {
+      transform: scale(1.0) translateX(180px);
+      font-style: italic;
+    }
+     
+    /* pm_nori_bu와 pm_workload에 대한 개별 스타일링 */
+    #pm_nori_bu:not(:placeholder-shown) + span.placeholder,
+    #pm_nori_bu:focus + span.placeholder, 
+    #pm_workload:not(:placeholder-shown) + span.placeholder,
+    #pm_workload:focus + span.placeholder {
+      transform: scale(1.0) translateX(280px);
+      font-style: italic;
+    }
+    
+    #pm_create_date:not(:placeholder-shown) + span.placeholder,
+    #pm_create_date:focus + span.placeholder {
+      transform: scale(1.0) translateX(230px);
+      font-style: italic;
+    }
+    
+    #pm_suggest_date:valid + span.placeholder,
+    #pm_suggest_date:focus + span.placeholder,
+    #pm_start_date:valid + span.placeholder,
+    #pm_start_date:focus + span.placeholder,
+    #pm_end_date:valid + span.placeholder,
+    #pm_end_date:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(160px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+}
+    /* pm_work_date에 대한 개별 스타일링 */
+    #pm_work_date:not(:placeholder-shown) + span.placeholder,
+    #pm_work_date:focus + span.placeholder {
+      transform: scale(1.0) translateX(160px);
+      font-style: italic; /* 입력시 기울기기 글꼴 */
+    }
+    
+div.input-block input:focus{
+  color: #284B63;
+  border-color:lightsteelblue;;
+}
+div.input-block input:focus + span.placeholder {
+  color: #284B63;
+}
+div.input-block select {
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 5px 5px;
+  border-radius: 1rem;
+  border: 2px solid lightsteelblue;
+  height: 35px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.input-block select:focus + span.placeholder {
+  display: none;
+}
+
+.scrollable {
+
+overflow-y: auto; /* 세로 스크롤 활성화 */
+padding-bottom: 20px;    
+}
+

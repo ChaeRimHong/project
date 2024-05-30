@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <title>norisystem HRM</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  
+  <!-- 
+  <link rel="stylesheet" th:href="@{css/assign_update.css}" />
+  <script type="text/javascript" th:src="@{js/assign_update.js}"></script>
+   -->
+<style type="text/css">
+    /* 모달 너비를 조정하는 CSS */
+    .modal-lg {
+      width: 80%; /* 모달 너비를 80%로 조정 */
+    }
+    /* 드롭다운 너비 조정 */
+    .select-width {
+      max-width: 150px; /* 드롭다운의 최대 너비를 지정 */
+    }
+    
+    
+.btn-group {
+     display: flex;
+     justify-content: center;
+        
+ }
+.btn-group .btn {
+    font-weight: bold;
+}
+/* Remove the navbar's default margin-bottom and rounded borders */ 
+.navbar {
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+.row.content {height: 450px}
+
+/* Set gray background color and 100% height */
+.sidenav {
+  padding-top: 20px;
+  background-color: #f1f1f1;
+  height: 100%;
+  width: auto;
+}
+
+/* Set black background color, white text and some padding */
+footer {
+  text-align: center; 
+  padding-bottom: 0;
+  background-color: #e6e6e6ce;
+  color: black;
+  bottom:-100px;
+  width: 100%;
+  height: 60px;
+}
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+  .sidenav {
+    height: auto;
+    padding: 15px;
+  }
+  .row.content {height:auto;} 
+}
+
+table {
+  text-align: center;
+  border: 2px solidd lightsteelblue;
+}
+
+th {
+  /* font-size: bold; */
+  text-align: center;
+  border: 2px solidd lightsteelblue;
+}
+
+td {
+  border: 2px solidd lightsteelblue;
+  text-align: center;
+}
+
+div.input-block {
+  position: relative;
+  
+}
+div.input-block input {
+  vertical-align: middle;
+  font-weight: 400;
+  font-size: 1.4rem;
+  color: #495055;
+  width: 100%;
+  padding: 5px 5px;
+  border-radius: 1rem;
+  border: 2px solid lightsteelblue;
+  outline:none;
+  height: 35px;
+  font-weight: bold;
+  padding-left: 20px;
+}
+div.input-block span.placeholder {
+  margin-left: 20px;
+  vertical-align: middle;
+  position: absolute;
+  margin: 7px 0;
+  padding: 0 4px;
+  font-family: Roboto, sans-serif;
+  color:  #6c757d;
+  display: flex;
+  align-items: center;
+  font-size: 1.6rem;
+  top: 0;
+  left: 17px;
+  transition: all 0.4s;
+  transform-origin: 0% 0%;
+  background: none;
+  pointer-events: none;
+}
+
+    #pm_nori_bu:valid + span.placeholder,
+    #pm_nori_bu:focus + span.placeholder, 
+    #pm_create_date:valid + span.placeholder,
+    #pm_create_date:focus + span.placeholder, 
+    #pm_manager:valid + span.placeholder,
+    #pm_manager:focus + span.placeholder, 
+    #pm_bu:valid + span.placeholder,
+    #pm_bu:focus + span.placeholder,
+    #pm_business:valid + span.placeholder,
+    #pm_business:focus + span.placeholder,
+    #pm_full:valid + span.placeholder,
+    #pm_full:focus + span.placeholder,
+    #pm_part:valid + span.placeholder,
+    #pm_part:focus + span.placeholder,
+    #pm_workload:valid + span.placeholder,
+    #pm_workload:focus + span.placeholder,
+    #pm_price:valid + span.placeholder,
+    #pm_price:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(230px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+}
+    #pm_suggest_date:valid + span.placeholder,
+    #pm_suggest_date:focus + span.placeholder,
+    #pm_start_date:valid + span.placeholder,
+    #pm_start_date:focus + span.placeholder,
+    #pm_end_date:valid + span.placeholder,
+    #pm_end_date:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(160px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+}
+
+    /* pm_code와 pm_name에 대한 개별 스타일링 */
+    #pm_code_date:not(:placeholder-shown) + span.placeholder,
+    #pm_code_date:focus + span.placeholder, 
+    #pm_name:not(:placeholder-shown) + span.placeholder,
+    #pm_name:focus + span.placeholder {
+      transform: scale(1.0) translateX(440px);
+      font-style: italic; /* 입력시 기울기기 글꼴 */
+    }
+    
+    /* pm_work_date에 대한 개별 스타일링 */
+    #pm_work_date:not(:placeholder-shown) + span.placeholder,
+    #pm_work_date:focus + span.placeholder {
+      transform: scale(1.0) translateX(160px);
+      font-style: italic; /* 입력시 기울기기 글꼴 */
+    }
+
+    /* pm_nori_manager에 대한 개별 스타일링 */
+    #pm_nori_manager:not(:placeholder-shown) + span.placeholder,
+    #pm_nori_manager:focus + span.placeholder {
+      transform: scale(1.0) translateX(180px);
+      font-style: italic;
+    }
+     
+    /* pm_nori_bu와 pm_workload에 대한 개별 스타일링 */
+    #pm_nori_bu:not(:placeholder-shown) + span.placeholder,
+    #pm_nori_bu:focus + span.placeholder, 
+    #pm_workload:not(:placeholder-shown) + span.placeholder,
+    #pm_workload:focus + span.placeholder {
+      transform: scale(1.0) translateX(280px);
+      font-style: italic;
+    }
+    
+div.input-block input:focus{
+  color: #284B63;
+  border-color:lightsteelblue;;
+}
+div.input-block input:focus + span.placeholder {
+  color: #284B63;
+}
+div.input-block select {
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 5px 5px;
+  border-radius: 1rem;
+  border: 2px solid lightsteelblue;
+  height: 35px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.input-block select:focus + span.placeholder {
+  display: none;
+}
+
+.scrollable {
+
+overflow-y: auto; /* 세로 스크롤 활성화 */
+padding-bottom: 20px;    
+}
+</style>
+<script type="text/javascript">
+function getCurrentDateTime() {
+    var currentDate = new Date();
+
+    // 년, 월, 일, 시, 분을 각각 가져옴
+    var year = currentDate.getFullYear();
+    var month = padZero(currentDate.getMonth() + 1);
+    var day = padZero(currentDate.getDate());
+    var hours = padZero(currentDate.getHours());
+    var minutes = padZero(currentDate.getMinutes());
+
+    // 년월일 시분을 숫자로 나타내기 위해 연결
+    var formattedDateTime = '' + year + month + day + hours + minutes;
+
+    return formattedDateTime;
+}
+
+// 숫자가 한 자리일 때 앞에 0을 붙이는 함수
+function padZero(num) {
+    return (num < 10 ? '0' : '') + num;
+}
+
+// 입력 필드에 현재 날짜 및 시간 설정
+document.getElementById
+</script>
+<script type="text/javascript">
+var addedEmployees = [];
+
+/////////////////////////////////////담당자 모달창///////////////////////////////////////////////
+$(document).ready(function(){
+var employees_pmmanager = /*[[${employees}]]*/ [];
+var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
+
+$("#searchInput_pmamanager").on("keyup", function() {
+var value = $(this).val().toLowerCase();
+$("#employeeList_pmmanager tr").filter(function() {
+$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+});
+});
+
+$("#pm_nori_manager_Modal").on("show.bs.modal", function(){
+// 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
+$("#employeeList_pmmanager tr").each(function(){
+var row_pmmanager = $(this);
+
+row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
+row_pmmanager.on("click", function(){
+// 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
+$("#employeeList_pmmanager tr.selected").removeClass("selected");
+row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
+
+// 클릭한 행에서 각 셀의 정보 가져오기
+var columns_pm = row_pmmanager.find("td");
+var name_pm = columns_pm.eq(2).text(); // 담당자 이름
+var dept_pm = columns_pm.eq(3).text(); // 부서
+
+// 선택된 사원 데이터를 selectedEmployeeData_pmmanager 변수에 저장
+selectedEmployeeData_pmmanager.name = name_pm; // 담당자 이름 저장
+selectedEmployeeData_pmmanager.dept = dept_pm; // 부서 저장
+
+// 가져온 사원 정보를 입력란에 표시
+$("#pm_nori_manager").val(selectedEmployeeData_pmmanager.name); // 담당자 이름
+$("#pm_nori_bu").val(selectedEmployeeData_pmmanager.dept); // 부서
+
+// 모달을 닫음
+$("#pm_nori_manager_Modal").modal("hide");
+});
+});
+});
+
+// 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
+$("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
+$("#employeeList_pmmanager tr.selected").removeClass("selected");
+// 입력된 데이터 초기화를 하지 않습니다.
+});
+});
+
+/////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
+$(document).ready(function(){
+//부서 정보 추출
+var deptOptions = {};
+$("#employeeList tr").each(function(){
+var dept = $(this).find("td:eq(3)").text(); // 부서 정보 추출
+deptOptions[dept] = true; // 중복 제거를 위해 객체의 속성으로 저장
+});
+
+//부서 필터 select 요소에 옵션 추가
+var deptFilter = $("#deptFilter");
+for (var dept in deptOptions) {
+if (deptOptions.hasOwnProperty(dept)) {
+$("<option>").val(dept).text(dept).appendTo(deptFilter);
+}
+}
+
+
+//필터링 옵션 변경
+$('#deptFilter').change(function() {
+var selectedDept = $(this).val();
+if (selectedDept !== '') {
+$("#employeeList tr").each(function() {
+var dept = $(this).find("td:eq(3)").text(); // 각 행의 부서 정보 추출
+if (dept !== selectedDept) {
+$(this).hide(); // 선택된 부서가 아닌 행 숨기기
+} else {
+$(this).show(); // 선택된 부서와 일치하는 행 표시
+}
+});
+} else {
+$("#employeeList tr").show(); // 전체를 선택한 경우 모든 행 표시
+}
+});
+
+/////////////////////////시작일 완료일 개월수계산
+//시작일과 완료일 입력란의 변경 이벤트를 감지하여 기간을 자동으로 계산 (월 단위)
+$("#pm_start_date, #pm_end_date").on("change", function() {
+var startDate = new Date($("#pm_start_date").val()); // 시작일
+var endDate = new Date($("#pm_end_date").val()); // 완료일
+
+// 시작일과 완료일이 모두 유효한 경우에만 기간을 계산하고 입력란에 표시
+if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+var diffMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+diffMonths -= startDate.getMonth();
+diffMonths += endDate.getMonth();
+
+// 기간 입력란에 계산된 기간을 표시
+$("#pm_work_date").val(diffMonths);
+} else {
+// 시작일 또는 완료일이 유효하지 않은 경우 기간 입력란을 비움
+$("#pm_work_date").val("");
+}
+});
+});
+/////////////////////////////////////엑셀파일 추가///////////////////////////////////////////////////
+$(document).ready(function(){
+// + 버튼에 이벤트 처리 함수 연결
+$("#addExcelRowButton").click(function() {
+addTableRowExel('myTable_excel', 'tableSelect_excel');
+});
+
+// - 버튼에 이벤트 처리 함수 연결
+$("#deleteExcelRowButton").click(function() {
+deleteTableRowExel('myTable_excel');
+});
+
+//엑셀파일 +/-
+function addTableRowExel(tableID, radioGroupName) {
+console.log("addTableRowExel 실행됨")
+var table_excel = document.getElementById(tableID);
+
+// 새로운 행 생성
+var newRow_excel = table_excel.insertRow();
+
+// 첫 번째 셀에 라디오 버튼 추가
+var cell1_excel = newRow_excel.insertCell(0);
+var radioInput = document.createElement("input");
+radioInput.type = "radio";
+radioInput.name = radioGroupName;
+cell1_excel.appendChild(radioInput);
+
+// 두 번째 셀에 파일 선택 input 추가
+var cell2_excel = newRow_excel.insertCell(1);
+var fileInput_excel = document.createElement("input");
+fileInput_excel.type = "file";
+fileInput_excel.className = "form-control-file";
+cell2_excel.appendChild(fileInput_excel);
+}
+
+//엑셀 테이블 행 삭제 함수
+function deleteTableRowExel(tableID) {
+var table_excel = document.getElementById(tableID);
+var rowCount_excel = table_excel.rows.length;
+
+// 테이블의 각 행을 확인하여 체크된 라디오 버튼이 있는지 검사하고 삭제
+for (var i = 0; i < rowCount_excel; i++) {
+var row_excel = table_excel.rows[i];
+var radioInput = row_excel.cells[0].querySelector("input[type='radio']");
+if (radioInput.checked) {
+table_excel.deleteRow(i);
+rowCount_excel--;
+i--;
+}
+}
+}
+});
+
+
+/////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
+$(document).ready(function(){
+var employees = /*[[${employees}]]*/ []; // 타임리프를 통해 employees 데이터를 가져옴
+var select = document.getElementById("deptSelect");
+var deptSet = new Set(); // 중복을 제거하기 위한 Set 생성
+
+$("#searchInput").on("keyup", function() {
+var value = $(this).val().toLowerCase();
+$("#employeeList tr").filter(function() {
+$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+});
+});
+// employees 리스트를 순회하며 dept_biz 값 추출하여 Set에 추가
+employees.forEach(function(employee) {
+deptSet.add(employee.dept_biz);
+});
+
+// Set에서 값을 꺼내어 option 요소 생성
+deptSet.forEach(function(dept) {
+var option = document.createElement("option");
+option.value = dept;
+option.text = dept;
+select.appendChild(option);
+});
+
+// 이미 추가된 사원들의 사번을 기억하는 배열
+var addedEmployeeIds = [];
+
+// 선택한 사원을 추가하는 함수
+function addSelectedEmployees() {
+var selectedEmployees = [];
+var duplicateDetected = false;
+
+// 기존에 추가된 사원들의 사번을 배열에 추가합니다.
+$("#myTable_sawon tbody tr").each(function(){
+var employeeId = $(this).find("td:eq(1)").text(); // 사번 가져오기
+addedEmployeeIds.push(employeeId);
+});
+
+$("#employeeList input[type='checkbox']:checked").each(function(){
+var row = $(this).closest("tr");
+var columns = row.find("td");
+var employeeData = [];
+columns.each(function(){
+employeeData.push($(this).text());
+});
+
+var id = employeeData[1]; // 사번을 기준으로 중복 여부 확인
+if (addedEmployeeIds.includes(id)) {
+duplicateDetected = true;
+} else {
+selectedEmployees.push(employeeData);
+}
+});
+
+// 테이블에 선택한 사원들을 추가합니다.
+var table = $("#myTable_sawon");
+$.each(selectedEmployees, function(index, value){
+var newRow = $("<tr>");
+// 첫 번째 셀에만 체크박스 추가
+$("<td>").html("<input type='checkbox' class='employee-checkbox'>").appendTo(newRow);
+$.each(value.slice(1), function(i, val){
+// 나머지 셀 추가
+$("<td>").html(val).appendTo(newRow);
+});
+newRow.appendTo(table);
+addedEmployeeIds.push(value[1]); // 사번을 addedEmployeeIds 배열에 추가
+console.log("addedEmployeeIds = "+addedEmployeeIds)
+});
+
+// 모달을 닫습니다.
+$("#myModal").modal("hide");
+}
+
+// '선택 추가' 버튼 클릭 시 선택된 사원을 테이블에 추가합니다.
+$("#addSelected").click(function(){
+addSelectedEmployees();
+});
+
+// 필터로 걸러진 사원만 전체 선택
+$('#selectAll').change(function() {
+var isChecked = $(this).prop('checked');
+$('#employeeList tr:visible input[type="checkbox"]').prop('checked', isChecked);
+});
+
+// removeSelectedSawon 버튼 클릭 시 선택된 사원 삭제
+$("#removeSelectedSawon").click(function(){
+$("#myTable_sawon input[type='checkbox']:checked").each(function(){
+var row = $(this).closest("tr");
+var id = row.find("td:eq(1)").text(); // 사번을 기준으로 삭제
+// 삭제 함수 호출
+removeAddedEmployee(id);
+// 행 삭제
+row.remove();
+});
+});
+
+// 추가된 사원 삭제 함수
+function removeAddedEmployee(employeeId) {
+// addedEmployees 배열에서 해당 사원의 인덱스를 찾습니다.
+var index = addedEmployees.indexOf(employeeId);
+if (index !== -1) {
+// 배열에서 해당 인덱스의 요소를 제거합니다.
+addedEmployees.splice(index, 1);
+}
+}
+
+
+// select 박스 선택시 미리보기 안보이게
+$('select').on('mousedown', function() {
+$(this).siblings('.placeholder').css('display', 'none');
+});
+
+// 저장 버튼에 이벤트 처리 함수 연결
+$("#saveButton").click(function(event) {
+event.preventDefault();
+saveDataToServer();
+});
+
+// 저장 함수 정의
+function saveDataToServer() {
+// FormData 생성
+var formData = new FormData();
+
+// 과제 정보 수집
+formData.append('pm_code', $('#pm_code').val());
+formData.append('pm_name', $('#pm_name').val());
+formData.append('pm_nori_manager', $('#pm_nori_manager').val());
+formData.append('pm_nori_bu', $('#pm_nori_bu').val());
+formData.append('pm_create_date', $('#pm_create_date').val());
+formData.append('pm_manager', $('#pm_manager').val());
+formData.append('pm_bu', $('#pm_bu').val());
+formData.append('pm_business', $('#pm_business').val());
+formData.append('pm_price', $('#pm_price').val());
+formData.append('pm_workload', $('#pm_workload').val());
+formData.append('pm_full', $('#pm_full').val());
+formData.append('pm_part', $('#pm_part').val());
+formData.append('pm_suggest_date', $('#pm_suggest_date').val());
+formData.append('pm_start_date', $('#pm_start_date').val());
+formData.append('pm_end_date', $('#pm_end_date').val());
+formData.append('pm_work_date', $('#pm_work_date').val());
+formData.append('pm_status', $('#pm_status').val());
+formData.append('pm_outline', $('#pm_outline').val());
+formData.append('pm_bego', $('#pm_bego').val());
+formData.append('comment', $('#comment').val());
+
+// 투입인력 정보 수집
+// 추가한 사원들의 사번을 formData에 추가
+console.log("add 시 addedEmployeeIds : "+addedEmployeeIds)
+addedEmployeeIds.forEach(function(employeeId) {
+formData.append('addedEmployeeIds', employeeId);
+});
+
+// 파일 업로드 처리
+var fileInputs = document.getElementById('pm_file').files;
+if (fileInputs.length > 0) {
+for (var i = 0; i < fileInputs.length; i++) {
+formData.append('pm_file', fileInputs[i]);
+}
+}
+
+// Ajax를 이용하여 서버로 데이터 전송
+$.ajax({
+url: '/updateTask', // 수정된 부분
+type: 'POST',
+data: formData,
+processData: false,
+contentType: false,
+success: function(response) {
+// 성공적으로 저장되었을 때의 동작
+console.log('데이터가 성공적으로 서버에 전송되었습니다.');
+},
+error: function(xhr, status, error) {
+// 에러 발생 시의 동작
+console.error('데이터 전송 중 오류가 발생했습니다:', error);
+}
+});
+}
+
+});
+
+</script>
+</head>
+<body>
+<!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
+<nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+      <a class="navbar-brand" th:href="@{/index}" style="font-weight: bold; color: orange;">norisystem</a>
+      </div>
+      <ul class="nav navbar-nav">
+          <!-- 사원관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                사원관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a th:href="@{/main}"  >사원관리</a></li>
+              </ul>
+          </li>
+          <!-- 사업관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                  사업관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/assign}"  >과제관리</a></li>
+              </ul>
+          </li>
+          <!-- 교육관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                교육관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/#}"  >교육이수</a></li>
+              </ul>
+          </li>
+          <!-- 통계현황 -->
+          <li><a th:href="@{/#}"  >통계현황</a></li>
+          <!-- 기준관리 -->
+          <li><a th:href="@{/code}"  >기준관리</a></li>
+          <!-- test -->
+          <li><a th:href="@{/test}"  >test</a></li>
+      </ul>
+      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
+          <button class="btn btn-link" style="float: right; color: lightskyblue;">
+              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
+          </button>
+      </form>
+    </div>
+  </nav>
+
+<!-- -------------------------------------main 부분------------------------------------- -->
+
+<div class="container" style="padding-top: 50px; padding-bottom: 50px;">
+    <form id="taskForm" th:action="@{/updateTask}" method="post" enctype="multipart/form-data">
+        <!-- 과제코드/과제명 -->
+        <div class="row" style="">
+            <!-- 과제코드 -->
+            <div class="col-md-6">
+                <div class="input-block">
+                    <!-- 자동으로 입력되는 년월일 시분을 표시할 input 필드 -->
+                    <input type="text" name="pm_code" id="pm_code_date" required spellcheck="false" 
+                           th:value="${tasks_id != null and not #lists.isEmpty(tasks_id) ? tasks_id[0].pm_code : ''}"
+                           style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">과제코드</span>
+                </div><br>
+            </div>
+            <!-- 과제명 -->
+            <div class="col-md-6">
+                <div class="input-block">
+                    <input type="text" name="pm_name" id="pm_name" required spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_name : ''}">
+                    <span class="placeholder">과제명</span>
+                </div><br>
+            </div>
+        </div>
+        <!-- 담당자/부서/과제생성일 -->
+        <hr />
+        <div class="row" style="padding-top: 15px">      
+            <!-- User -->
+            <div class="col-md-1" style="text-align: right; vertical-align: middle;">
+                <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#pm_nori_manager_Modal">
+                    <span class="glyphicon glyphicon-user"></span> User 
+                </button>
+            </div>
+            <!-- 모달 -->
+            <div id="pm_nori_manager_Modal" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- 모달 내용 -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">사원 선택</h4>
+                        </div>
+                        <div class="modal-body">
+                            <!-- 
+                            <label for="deptFilter_pmmanager">부서 선택:</label>
+                                <select id="deptSelect" class="form-control">
+                                    <option value="">전체</option>
+                                    <option th:each="employees : ${employees}" th:value="${employees.dept_biz}" th:text="${employees.dept_biz}"></option>
+                                </select>
+                            <br>
+                             -->
+                            <input type="text" id="searchInput_pmamanager" class="form-control" placeholder="검색...">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>사번</th>
+                                        <th>성명</th>
+                                        <th>사업부</th>
+                                        <th>그룹명</th>
+                                        <th>직급</th>
+                                        <th>휴대전화</th>
+                                        <th>이메일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeList_pmmanager">
+                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
+                                    <tr th:each="employee : ${employees}">
+                                        <td></td>
+                                        <td th:text="${employee.emp_num}"></td>
+                                        <td th:text="${employee.name_kor}"></td>
+                                        <td th:text="${employee.dept_biz}"></td>
+                                        <td th:text="${employee.dept_group}"></td>
+                                        <td th:text="${employee.emp_rank}"></td>
+                                        <td th:text="${employee.phone}"></td>
+                                        <td th:text="${employee.mail}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 담당자  -->
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="pm_nori_manager" id="pm_nori_manager" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_nori_manager : ''}"
+                    style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">담당자</span>
+                </div><br>
+            </div>
+            <!-- 부서 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_nori_bu" id="pm_nori_bu" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_nori_bu : ''}"
+                    style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">부서</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="date" name="pm_create_date" id="pm_create_date" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_create_date : ''}" >
+                    <span class="placeholder">과제생성일</span>
+                </div>
+            </div>
+        </div>
+        <!-- 책임자/부서/고객사 -->
+        <div class="row" style="">
+            <!-- 책임자 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_manager" id="pm_manager" required spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_manager : ''}">
+                    <span class="placeholder">책임자(고객)</span>
+                </div><br>
+            </div>
+            <!-- 부서 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_bu" id="pm_bu" required spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_bu : ''}">
+                    <span class="placeholder">부서(고객)</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_business" id="pm_business" required spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_business : ''}">
+                    <span class="placeholder">고객사</span>
+                </div>
+            </div>
+        </div>
+        <!-- 공수/정규(명)/파트너(명) -->
+        <div class="row" style="">
+            <!-- 정규 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_full" id="pm_full" required spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_full : ''}">
+                    <span class="placeholder">정규(명)</span>
+                </div>
+            </div>
+            <!-- 파트너 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_part" id="pm_part" required spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_part : ''}">
+                    <span class="placeholder">파트너(명)</span>
+                </div>
+            </div>
+            <!-- 공수 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_workload" id="pm_workload" spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_workload : ''}" readonly
+                    style="background-color: lightgray;">
+                    <span class="placeholder">공수</span>
+                </div><br>
+            </div>
+        </div>
+        <!-- 계약금액 -->
+        <div class="row" style="">
+            <!-- 계약금액 -->
+            <div class="col-md-4">
+                <div class="input-block">
+                    <input type="text" name="pm_price" id="pm_price" required spellcheck="false"
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_price : ''}">
+                    <span class="placeholder">계약금액(원)</span>
+                </div><br>
+            </div>
+            <div class="col-md-4" style="visibility:hidden">
+                <div class="input-block">
+                    <input type="text" name="input-text" id="" spellcheck="false" >
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-block" style="visibility:hidden">
+                    <input type="text" name="input-text" id="" spellcheck="false" >
+                </div>
+            </div>
+        </div>
+        <!-- 제안일/시작일/완료일/기간 -->
+        <hr />
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="date" name="pm_suggest_date" id="pm_suggest_date" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_suggest_date : ''}">
+                    <span class="placeholder">제안일</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="date" name="pm_start_date" id="pm_start_date" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_start_date : ''}">
+                    <span class="placeholder">시작일</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="date" name="pm_end_date" id="pm_end_date" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_end_date : ''}">
+                    <span class="placeholder">완료일</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="pm_work_date" id="pm_work_date" spellcheck="false" 
+                    th:value="${tasks_id != null ? tasks_id.get(0).pm_work_date : ''}" readonly
+                    style="background-color: lightgray;">
+                    <span class="placeholder">기간(월)</span>
+                </div>
+            </div>
+        </div>
+        <!-- 투입예정/확정유무 -->
+        <div class="row" style="">
+                <div class="input-block">
+                    <div class="col-md-6 form-group">
+                        <select name="pm_status" id="pm_status" class="form-control" required>
+                            <option value="상태" disabled>상태</option>
+                            <option value="투입" {{ pm_status == '투입' ? 'selected' : '' }}>투입</option>
+                            <option value="투입예정" {{ pm_status == '투입예정' ? 'selected' : '' }}>투입예정</option>
+                            <option value="대기" {{ pm_status == '대기' ? 'selected' : '' }}>대기</option>
+                        </select>
+                        <span class="placeholder"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <select name="pm_outline" id="pm_confirmed" class="form-control" required>
+                            <option value="확정유무" disabled>확정유무</option>  
+                            <option value="Y" {{ pm_outline == 'Y' ? 'selected' : '' }}>Y</option>
+                            <option value="N" {{ pm_outline == 'N' ? 'selected' : '' }}>N</option>
+                        </select>
+                        <span class="placeholder"></span>
+                    </div>
+                </div>
+        </div>
+        <!-- 개요 -->
+        <hr />
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-12">
+                <div class="input-block form-group">
+                    <label for="comment" class="placeholder">개요 : </label>
+                    <textarea class="form-control" rows="5" id="pm_outline" 
+                    th:text="${tasks_id != null ? tasks_id.get(0).pm_outline : ''}"></textarea>
+                </div><br>
+            </div>
+        </div>
+        <!-- 투입인력정보 -->
+        <div class="row" style="">
+            <div class="container">
+                <h5 style="font-weight: bold;">투입인력정보</h5>
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead class="input-block">
+                        <tr>
+                            <th>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
+                                    <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
+                                </div>
+                            </th>
+                            <th>사번</th>
+                            <th>성명</th>
+                            <th>사업부</th>
+                            <th>그룹명</th>
+                            <th>직급</th>
+                            <th>휴대전화</th>
+                            <th>이메일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_sawon">
+                        <!-- 테이블 행 추가되는 부분 -->
+                <tr th:each="employee : ${emp}">
+                    <td><input type="checkbox" class="employee-checkbox"></td>
+                    <td th:text="${employee.emp_num}"></td>
+                    <td th:text="${employee.name_kor}"></td>
+                    <td th:text="${employee.dept_biz}"></td>
+                    <td th:text="${employee.dept_group}"></td>
+                    <td th:text="${employee.emp_rank}"></td>
+                    <td th:text="${employee.phone}"></td>
+                    <td th:text="${employee.mail}"></td>
+                </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 모달 -->
+            <div id="myModal" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <!-- 모달 내용 -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">사원 선택</h4>
+                        </div>
+                        <div class="modal-body">
+                            <label for="deptFilter">부서 선택:</label>
+                            <select id="deptFilter" class="form-control">
+                                <option value="">전체</option> <!-- 전체 옵션 추가 -->
+                                <!-- 여기에 각 부서별 옵션을 추가하기 위한 JavaScript 코드가 들어갈 예정 -->
+                            </select>
+                            <br>
+                            <input type="text" id="searchInput" class="form-control" placeholder="검색...">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAll"></th>
+                                        <th>사번</th>
+                                        <th>성명</th>
+                                        <th>사업부</th>
+                                        <th>그룹명</th>
+                                        <th>직급</th>
+                                        <th>휴대전화</th>
+                                        <th>이메일</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeList">
+                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
+                                    <tr th:each="employee : ${employees}">
+                                        <td><input type="checkbox"></td>
+                                        <td th:text="${employee.emp_num}"></td>
+                                        <td th:text="${employee.name_kor}"></td>
+                                        <td th:text="${employee.dept_biz}"></td>
+                                        <td th:text="${employee.dept_group}"></td>
+                                        <td th:text="${employee.emp_rank}"></td>
+                                        <td th:text="${employee.phone}"></td>
+                                        <td th:text="${employee.mail}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- 페이징 컨트롤 -->
+                            <ul class="pagination" id="pageContent">
+                                <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 특이사항 -->
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-12">
+                <div class="input-block form-group">
+                    <label for="comment" class="placeholder">특이사항 : </label>
+                    <textarea class="form-control" rows="5" id="pm_bego"  th:text="${tasks_id != null ? tasks_id.get(0).pm_bego : ''}"></textarea>
+                </div><br>
+            </div>
+        </div>
+        <!-- 엑셀첨부 -->
+        <div class="row" style="padding-bottom: 50px; padding-top: 20px; display: flex; justify-content: center;">
+            <a th:href="@{/assign}" style="text-align: center;" class="btn btn-default" th:text="취소"></a>
+            <a th:href="@{/assign}" id="saveButton" style="text-align: center;" class="btn btn-default">저장</a>
+        </div>
+    </form>
+</div>
+
+</body>
+
+<div class="content" style="padding-bottom: 0;">
+<footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
+
+    <a class="text-muted">©norisystem Corp.</a><br>
+    <a th:href="@{http://www.norisystem.co.kr/}" target="_blank">Main Home / </a>
+    <a th:href="@{https://gw.norisystem.co.kr/ngw/app/#/}" target="_blank">GroupWare</a>
+    <br>
+
+</footer>
+</div>
+
+</body>
+</html>

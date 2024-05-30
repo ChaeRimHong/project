@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>norisystem HRM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/main.css" th:href="@{css/main.css}" />
+  <script type="text/javascript" src="js/main.js" th:href="@{js/main.js}"></script>
+  <style>
+    #show {
+      display: none; /* 처음에 숨겨짐 */
+    }
+    #wrap {
+      min-height: calc(100% - 120px);
+    }
+    html,
+    body {
+      height: 100%;
+      padding: 0px;
+      margin: 0px;
+    }
+  </style>
+</head>
+<body>
+<!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
+  <nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+      <a class="navbar-brand" th:href="@{/main}" style="font-weight: bold; color: orange;">norisystem</a>
+      </div>
+      <ul class="nav navbar-nav">
+          <!-- 사원관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                사원관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a th:href="@{/main}"  >사원관리</a></li>
+              </ul>
+          </li>
+          <!-- 사업관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                  사업관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/assign}"  >과제관리</a></li>
+              </ul>
+          </li>
+          <!-- 교육관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                교육관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/#}"  >교육이수</a></li>
+              </ul>
+          </li>
+          <!-- 통계현황 -->
+          <li><a th:href="@{/#}"  >통계현황</a></li>
+          <!-- 기준관리 -->
+          <li><a th:href="@{/code}"  >기준관리</a></li>
+          <!-- test -->
+          <li><a th:href="@{/test}"  >test</a></li>
+          <li><a th:href="@{/test2}"  >test2</a></li>
+      </ul>
+      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
+          <button class="btn btn-link" style="float: right; color: lightskyblue;">
+              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
+          </button>
+      </form>
+    </div>
+  </nav>
+<!-- -------------------------------------main 부분------------------------------------- -->
+<div class="container" style="padding-top: 50px; padding-bottom: 50px;" id="wrap">
+<div class="row" style="text-align: center;">
+<br>
+
+<div class="col-md-2 form-group">
+<select class="form-control" id="businessUnit" onchange="updateDepartments()" style="font-weight: bold;">
+    <option value="사업부" th:placeholder="사업부" disabled="disabled">사업부</option>
+    <option th:each="employee : ${employees}" 
+            th:value="${employee.dept_biz}" 
+            th:text="${employee.dept_biz}">
+    </option>
+</select>
+</div>
+<div class="col-md-2 form-group">
+<select class="form-control" id="department" onchange="updateEmployees()" style="font-weight: bold;">
+    <option value="부서" th:placeholder="부서" >부서</option>
+</select>
+</div>
+
+<div class="col-md-6 form-group">
+<div class="col-md-10">
+<input type="text" class="form-control"  id="searchInput" style="display: inline-block;" placeholder="이름을 입력하세요">
+</div>
+<div class="col-md-2">
+<button class="btn btn-default" id="searchButton" style="font-weight: bold;">검색</button>
+</div>
+</div>
+
+<div class="col-md-2 form-group">
+<button class="btn btn-default" id="allsearchButton" onclick="updateAllEmployees()" style="font-weight: bold;">전체</button>
+<a th:href="@{/board}" class="btn btn-primary" style="font-weight: bold;">신규</a>
+</div>
+</div>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div id="show">
+        <table class="table table-hover">
+          <br><br><br>
+          <thead>
+            <tr>
+              <th>사번</th>
+              <th>이름</th>
+              <th>사업부</th>
+              <th>부서명</th>
+              <th>직무</th>
+              <th>직급</th>
+              <th>직책</th>              
+              <th>휴대폰</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTableBody">
+          </tbody>
+        </table>
+        </div>
+    <div class="col-md-1"></div>
+    </div>
+</div>
+</div>
+
+<!-- 모달 창 -->
+<div id="employeeModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- 모달 내용 -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">사원 정보</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>사진:</strong> <span id="pic"></span></p>
+            <p><strong>사원 번호:</strong> <span id="emp_num"></span></p>
+            <p><strong>이름:</strong> <span id="emp_name"></span></p>
+            <p><strong>사업부:</strong> <span id="dept_biz"></span></p>
+            <p><strong>부서명:</strong> <span id="dept_group"></span></p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>직무:</strong> <span id="position"></span></p>
+            <p><strong>직급:</strong> <span id="emp_rank"></span></p>
+            <p><strong>직책:</strong> <span id="work_pos"></span></p>
+            <p><strong>휴대폰:</strong> <span id="phone"></span></p>
+            <p><strong>Email:</strong> <span id="mail"></span></p>
+          </div>
+        </div>
+      </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" id="deleteEmployeeBtn">삭제</button>
+    <button type="button" class="btn btn-primary" id="editEmployeeBtn">수정</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">x</button>
+  </div>
+    </div>
+
+  </div>
+</div>
+
+
+<div class="content" style="padding-bottom: 0;">
+    <footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
+        <a class="text-muted">©norisystem Corp.</a><br>
+        <a href="http://www.norisystem.co.kr/" target="_blank">Main Home / </a>
+        <a href="https://gw.norisystem.co.kr/ngw/app/#/" target="_blank">GroupWare</a>
+        <br>
+    </footer>
+</div>
+
+
+<script th:inline="javascript">
+
+  $(document).ready(function(){
+    var uniqueBusinessUnits = [];
+    $("#businessUnit option").each(function(){
+      if($.inArray(this.value, uniqueBusinessUnits) === -1){
+        uniqueBusinessUnits.push(this.value);
+      }
+    });
+    $("#businessUnit").empty();
+    for(var i = 0; i < uniqueBusinessUnits.length; i++){
+      $("#businessUnit").append("<option value='" + uniqueBusinessUnits[i] + "'>" + uniqueBusinessUnits[i] + "</option>");
+    }
+  });
+  
+  /*<![CDATA[*/
+///////////////////////////////////////////사업부///////////////////////////////////////////
+  function updateDepartments() {
+      // 선택된 사업부의 값 가져오기
+      var selectedBusinessUnit = document.getElementById("businessUnit").value;
+
+      // 선택된 사업부에 해당하는 사원 데이터 가져오기
+      var employees = /*[[${employees}]]*/ [];
+      var filteredEmployees = employees.filter(function(employee) {
+          return employee.dept_biz === selectedBusinessUnit;
+      });
+
+      // 테이블의 tbody 엘리먼트 찾기
+      var tbody = document.getElementById("employeeTableBody");
+
+      // tbody 내용 비우기
+      tbody.innerHTML = "";
+
+      // 사원 데이터를 테이블에 추가하기
+      filteredEmployees.forEach(function(employee) {
+          var tr = document.createElement("tr");
+          tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
+                         
+          tbody.appendChild(tr);
+      });
+
+      // 부서 선택 창 업데이트
+      var departmentSelect = document.getElementById("department");
+      departmentSelect.innerHTML = "<option value='부서' th:placeholder='부서'>부서</option>";
+      var seen = {};
+      filteredEmployees.forEach(function(employee) {
+          if (!seen[employee.dept_group]) {
+              var option = document.createElement("option");
+              option.value = employee.dept_group;
+              option.text = employee.dept_group;
+              departmentSelect.appendChild(option);
+              seen[employee.dept_group] = true;
+          }
+      });
+
+      // 사업부를 선택했을 때 테이블 표시
+      document.getElementById("show").style.display = "block";
+  }
+///////////////////////////////////////////부서///////////////////////////////////////////
+  function updateEmployees() {
+      // 선택된 부서의 값 가져오기
+      var selectedDepartment = document.getElementById("department").value;
+
+      // 선택된 사업부의 값 가져오기
+      var selectedBusinessUnit = document.getElementById("businessUnit").value;
+
+      // 선택된 사업부와 부서에 해당하는 사원 데이터 가져오기
+      var employees = /*[[${employees}]]*/ [];
+      var filteredEmployees = employees.filter(function(employee) {
+          return employee.dept_biz === selectedBusinessUnit && employee.dept_group === selectedDepartment;
+      });
+
+      // 테이블의 tbody 엘리먼트 찾기
+      var tbody = document.getElementById("employeeTableBody");
+
+      // tbody 내용 비우기
+      tbody.innerHTML = "";
+
+      // 사원 데이터를 테이블에 추가하기
+      filteredEmployees.forEach(function(employee) {
+          var tr = document.createElement("tr");
+          tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
+          tbody.appendChild(tr);
+      });
+  }
+///////////////////////////////////////////전체///////////////////////////////////////////
+  // 전체 사원 데이터를 가져와 테이블에 표시하는 함수
+  function updateAllEmployees() {
+      // 전체 사원 데이터 가져오기
+      var employees = /*[[${employees}]]*/ [];
+
+      // 테이블의 tbody 엘리먼트 찾기
+      var tbody = document.getElementById("employeeTableBody");
+
+      // tbody 내용 비우기
+      tbody.innerHTML = "";
+
+      // 사원 데이터를 테이블에 추가하기
+      employees.forEach(function(employee) {
+          var tr = document.createElement("tr");
+          tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
+                         "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
+          tbody.appendChild(tr);
+      });
+
+      // 사원 전체를 표시한 후 테이블 표시
+      document.getElementById("show").style.display = "block";
+  }
+  
+  // 검색 버튼 클릭 이벤트
+  document.getElementById("searchButton").onclick = search;
+  
+  // Enter 키 눌렀을 때 검색 이벤트
+  document.getElementById("searchInput").addEventListener("keyup", function(event) {
+    // 엔터 키가 눌렸을 때
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      search();
+    }
+  });
+  
+///////////////////////////////////////////검색///////////////////////////////////////////
+  // 검색 기능 함수
+  function search() {
+    // 검색할 텍스트 가져오기
+    var searchText = document.getElementById("searchInput").value.toLowerCase();
+
+    // 테이블의 tbody 엘리먼트 찾기
+    var tbody = document.getElementById("employeeTableBody");
+
+    // 모든 행 검색
+    var rows = tbody.getElementsByTagName("tr");
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var cells = row.getElementsByTagName("td");
+      var found = false;
+
+      // 각 행의 모든 셀을 검색하여 검색어와 일치하는지 확인
+      for (var j = 0; j < cells.length; j++) {
+        var cellText = cells[j].textContent.toLowerCase();
+        if (cellText.includes(searchText)) {
+          found = true;
+          break;
+        }
+      }
+
+      // 검색어가 포함된 행은 표시하고 그렇지 않은 경우 숨김
+      if (found) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    }
+  }
+///////////////////////////////////////////모달///////////////////////////////////////////
+  // 사원 이름 클릭 시 모달 열기
+  $(document).on("click", ".employee-name", function() {
+    // 클릭된 사원의 사원번호를 가져오기
+    var empNum = $(this).attr("data-empnum");
+    console.log("Clicked employee number:", empNum);
+
+    // 클릭된 사원의 정보를 가져오기
+    var employees = /*[[${employees}]]*/ [];
+    var employeeFound = false;
+
+    // 직원 정보를 검색하여 클릭된 사원의 정보 찾기
+    for (var i = 0; i < employees.length; i++) {
+        if (employees[i].emp_num === parseInt(empNum, 10)) {
+            // 직원 정보를 바로 모달에 표시
+            var modalBodyHtml = "<div class='row'>" +
+                                    "<div class='col-md-6' id='modal-left'>" +
+                                        "<img src='" + employees[i].pic + "' alt='Employee Picture' style='max-width: 100%; height: auto;'>" +
+                                    "</div>" +
+                                   "<div class='col-md-6' id='modal-right'>" +
+                                  "<p><strong>사원번호:</strong> <span id='emp_num'>" + employees[i].emp_num + "</span></p>" +
+                                  "<p><strong>이름:</strong> " + employees[i].name_kor + "</p>" +
+                                   "<p><strong>영문 이름:</strong> " + employees[i].name_eng + "</p>" +
+                                   "<p><strong>사업부:</strong> " + employees[i].dept_biz + "</p>" +
+                                   "<p><strong>부서명:</strong> " + employees[i].dept_group + "</p>" +
+                                   "<p><strong>직무:</strong> " + employees[i].position + "</p>" +
+                                   "<p><strong>직급:</strong> " + employees[i].emp_rank + "</p>" +
+                                   "<p><strong>직책:</strong> " + employees[i].work_pos + "</p>" +
+                                   "<p><strong>휴대폰:</strong> " + employees[i].phone + "</p>" +
+                                   "<p><strong>Email:</strong> " + employees[i].mail + "</p>" +
+                                   "<p><strong>주소:</strong> " + employees[i].address + "</p>" +
+                                   "<p><strong>도로명 주소:</strong> " + employees[i].address_num + "</p>" +
+                                   "<p><strong>입사일:</strong> " + employees[i].date_join + "</p>" +
+                                   "<p><strong>최종 학력:</strong> " + employees[i].last_edu + "</p>" +
+                                   "<p><strong>병역:</strong> " + employees[i].military + "</p>" +
+                                   "<p><strong>결혼:</strong> " + employees[i].marry + "</p>" +
+                                   "<p><strong>신장:</strong> " + employees[i].height + "</p>" +
+                                   "<p><strong>몸무게&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> " + employees[i].weight + "</p>" +
+                                   "<p><strong>성별&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> " + employees[i].gender + "</p>" +
+                                   "<p><strong>참여 프로젝트:</strong> " + employees[i].pm_code + "</p>" +
+                                   "<p><strong>구분&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> " + employees[i].input_gbn + "</p>" +
+                                   "</div>" +
+                                "</div>";
+
+            // 모달 바디에 HTML 삽입
+            $(".modal-body").html(modalBodyHtml);
+
+            // 모달 창 너비 조정
+            $('#employeeModal .modal-dialog').addClass('modal-lg');
+
+            // 모달 열기
+            $('#employeeModal').modal('show');
+
+            // 사원 정보가 발견되었음을 표시
+            employeeFound = true;
+            break;
+        }
+    }
+
+    // 직원 정보를 찾을 수 없는 경우 메시지 표시
+    if (!employeeFound) {
+        var modalBodyHtml = "<p><strong>사원 정보를 찾을 수 없습니다.</strong></p>";
+
+        // 모달 바디에 HTML 삽입
+        $(".modal-body").html(modalBodyHtml);
+
+        // 모달 열기
+        $('#employeeModal').modal('show');
+    }
+
+    // 삭제 버튼 클릭 이벤트
+    $("#deleteEmployeeBtn").off("click").on("click", function() {
+        confirmDelete(empNum);
+    });
+
+    // 수정 버튼 클릭 이벤트
+    $("#editEmployeeBtn").off("click").on("click", function() {
+        // 모달 창에 표시된 사원 번호를 가져옴
+        var empNum = $("#emp_num").text();
+        console.log("Edit button clicked, employee number:", empNum);
+
+        // 수정 페이지로 이동, 사원 번호를 URL 파라미터로 전달하여 board_update.html로 이동
+        window.location.href = "/board_update.html?emp_num=" + empNum;
+    });
+});
+
+// 삭제 확인 함수
+function confirmDelete(empNum) {
+    // 확인창 띄우기
+    var confirmDelete = confirm("삭제하시겠습니까?");
+
+    // 예를 선택한 경우
+    if (confirmDelete) {
+        // AJAX를 사용하여 백엔드 서버에 삭제 요청 보내기
+        $.ajax({
+            url: '/employees/delete', // 삭제 요청을 처리할 백엔드 API 엔드포인트의 URL
+            type: 'POST', // DELETE 메서드로 요청을 보내도록 설정
+            data: { empNum: empNum }, // 삭제할 사원의 emp_num을 데이터로 전송
+            success: function(response) {
+                // 삭제 성공 시, 모달 닫기 등의 추가 작업 수행
+                console.log("사원 삭제 성공");
+                $('#employeeModal').modal('hide'); // 모달 닫기
+                // 추가로 수행할 작업이 있으면 이 곳에 작성
+            },
+            error: function(xhr, status, error) {
+                // 삭제 실패 시, 오류 처리 등을 수행
+                console.error("사원 삭제 실패: " + error);
+                // 추가로 수행할 작업이 있으면 이 곳에 작성
+            }
+        });
+    }
+}
+
+  /*]]>*/
+</script>
+</body>
+</html>

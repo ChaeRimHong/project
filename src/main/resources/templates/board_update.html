@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>norisystem HRM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/board.css" th:href="@{css/board.css}" />
+  <script src="js/board.js" th:href="@{js/board.js}"></script>
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+	    // 중복 제거 로직
+	    const businessUnitSelect = document.getElementById('businessUnit');
+	    const empRankSelect = document.getElementById('emp_rank_select');
+	    const empPositionSelect = document.getElementById('emp_position_select');
+	    
+	    const departmentSelect = document.getElementById('department');
+	    const departmentOptions = Array.from(departmentSelect.options);
+
+	    const uniqueRanks = new Set();
+	    const uniquePositions = new Set();
+
+	    // 직급 옵션들 중복 제거
+	    Array.from(empRankSelect.options).forEach(option => {
+	        if (option.value !== '직급' && option.value !== '' && !uniqueRanks.has(option.value)) {
+	            uniqueRanks.add(option.value);
+	        }
+	    });
+
+	    // 직책 옵션들 중복 제거
+	    Array.from(empPositionSelect.options).forEach(option => {
+	        if (option.value !== '직책' && option.value !== '' && !uniquePositions.has(option.value)) {
+	            uniquePositions.add(option.value);
+	        }
+	    });
+
+	    // 새로운 직급 옵션 목록 적용
+	    empRankSelect.innerHTML = '<option value="직급" th:placeholder="직급" disabled="disabled" selected>직급</option>';
+	    uniqueRanks.forEach(rank => {
+	        empRankSelect.innerHTML += `<option value="${rank}">${rank}</option>`;
+	    });
+
+	    // 새로운 직책 옵션 목록 적용
+	    empPositionSelect.innerHTML = '<option value="직책" th:placeholder="직책" disabled="disabled" selected>직책</option>';
+	    uniquePositions.forEach(position => {
+	        empPositionSelect.innerHTML += `<option value="${position}">${position}</option>`;
+	    });
+	});
+   function addTableRow(tableID, radioGroupName) {
+	    var table = document.getElementById(tableID);
+
+	    // 테이블이 존재하는지 확인
+	    if (table && table.rows.length > 0 && table.rows[0].cells.length > 0) {
+	        var rowCount = table.rows.length;
+	        var row = table.insertRow(rowCount);
+	    
+	        var cell1 = row.insertCell(0);
+	        var element1 = document.createElement("input");
+	        element1.type = "radio";
+	        element1.name = radioGroupName;
+	        cell1.appendChild(element1);
+	    
+	        // 각 열에 적합한 input 요소를 생성하여 삽입
+	        for (var i = 1; i < table.rows[0].cells.length; i++) {
+	            var cell = row.insertCell(i);
+	            var element = document.createElement("input");
+
+	            // 해당 열의 첫 번째 셀의 input 요소의 type을 확인하여 타입을 설정
+	            var firstCellInputType = table.rows[0].cells[i].querySelector("input").type;
+	            if (firstCellInputType === "date") {
+	                // type이 date인 경우
+	                element.type = "date";
+	            } else {
+	                // 그 외의 경우 (type이 text인 경우 등)
+	                element.type = "text";
+	            }
+
+	            element.className = "form-control";
+	            cell.appendChild(element);
+	        }
+	    } else {
+	        console.error("Table with ID '" + tableID + "' not found or has no rows or cells.");
+	    }
+	}
+</script>
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 중복 제거 로직
+        const businessUnitSelect = document.getElementById('businessUnit');
+        const bizOptions = Array.from(businessUnitSelect.options);
+        const uniqueBizValues = new Set();
+        bizOptions.forEach(option => {
+            if (uniqueBizValues.has(option.value)) {
+                option.remove();
+            } else {
+                uniqueBizValues.add(option.value);
+            }
+        });
+
+        // 부서 옵션들을 저장
+        const departmentSelect = document.getElementById('department');
+        const departmentOptions = Array.from(departmentSelect.options);
+
+        // 부서 필터링 함수
+        window.filterDepartments = function() {
+            const selectedBiz = businessUnitSelect.value;
+
+            // 부서 셀렉트 박스를 초기화 및 활성화
+            departmentSelect.innerHTML = '<option value="부서" disabled="disabled" selected>부서</option>';
+            departmentSelect.disabled = false;
+
+            // 중복 부서 제거를 위한 Set
+            const uniqueDeptValues = new Set();
+
+            // 필터링된 부서 옵션들을 추가
+            departmentOptions.forEach(option => {
+                if (option.getAttribute('data-biz') === selectedBiz && !uniqueDeptValues.has(option.value)) {
+                    departmentSelect.appendChild(option);
+                    uniqueDeptValues.add(option.value);
+                }
+            });
+        };
+
+        // 초기 부서 셀렉트 박스 비활성화
+        departmentSelect.disabled = true;
+
+        // 사업부 선택 이벤트 핸들러
+        businessUnitSelect.addEventListener('change', function() {
+            if (this.value !== '사업부') {
+                filterDepartments();
+            } else {
+                departmentSelect.disabled = true;
+            }
+        });
+    });
+  </script>
+</head>
+<body>
+<!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
+  <nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+      <a class="navbar-brand" th:href="@{/index}" style="font-weight: bold; color: orange;">norisystem</a>
+      </div>
+      <ul class="nav navbar-nav">
+          <!-- 사원관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                사원관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a th:href="@{/main}"  >사원관리</a></li>
+              </ul>
+          </li>
+          <!-- 사업관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                  사업관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/assign}"  >과제관리</a></li>
+              </ul>
+          </li>
+          <!-- 교육관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                교육관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/#}"  >교육이수</a></li>
+              </ul>
+          </li>
+          <!-- 통계현황 -->
+          <li><a th:href="@{/#}"  >통계현황</a></li>
+          <!-- 기준관리 -->
+          <li><a th:href="@{/code}"  >기준관리</a></li>
+          <!-- test -->
+          <li><a th:href="@{/test}"  >test</a></li>
+      </ul>
+      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
+          <button class="btn btn-link" style="float: right; color: lightskyblue;">
+              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
+          </button>
+      </form>
+    </div>
+  </nav>
+<!-- -------------------------------------main 부분------------------------------------- -->
+<div class="container" style="padding-top: 50px; padding-bottom: 50px; width: 1400px;">
+    <form action="/addEmployees" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <!-- 왼쪽에 사진 -->
+        <div class="col-md-3">
+            <div style="text-align: center;">
+                <img id="preview_img" src="image/img_upload.png" alt="" 
+                style="width: 150px; height: 150px; cursor: pointer;" 
+                onclick="document.getElementById('fileInput').click();">
+                <p style="margin-top: 10px;">이미지를 클릭하여 파일을 선택하세요.</p>
+            </div>
+            <div class="row" style="padding-top:5px;width:80%;margin-left:30px;">
+                <div class="input-block">
+                    <input type="text" name="input-text" id="emp_num" required spellcheck="false">
+                    <span class="placeholder">사번</span>
+                </div>
+            </div>
+            <br>
+            <input type="file" id="fileInput" onchange="previewImage(event)" style="display: none;">
+        </div>
+        <!-- 나머지 데이터는 오른쪽 -->
+        <div class="col-md-9" style="padding-top: 15px">
+            <!-- 이름/영문이름/휴대폰 -->
+            <div class="row" style="padding-bottom:10px;">
+                <!-- 이름 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="name_kor" required spellcheck="false">
+                        <span class="placeholder">이름</span>
+                    </div>
+                </div>
+                <!-- 영문이름 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="name_eng" required spellcheck="false">
+                        <span class="placeholder">영문이름</span>
+                    </div>
+                </div>
+                <!-- 휴대폰 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="phone" required spellcheck="false">
+                        <span class="placeholder">휴대폰</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 주민번호/나이/성별 -->
+            <div class="row" style="padding-bottom:10px;">
+                <!-- 주민번호 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="reg_num" required spellcheck="false">
+                        <span class="placeholder">주민번호</span>
+                    </div>
+                </div>
+                <!-- 나이 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="age" required spellcheck="false">
+                        <span class="placeholder">나이</span>
+                    </div>
+                </div>
+                <!-- 성별 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="reg_num" required spellcheck="false">
+                        <span class="placeholder">성별</span>
+                    </div>
+                </div>
+            </div>            
+            
+            <!-- 사업부/그룹/휴대폰 -->
+            <div class="row" style="padding-bottom:10px;">
+                <!-- 사업부 -->
+                <div class="col-md-4">
+                    <select class="form-control" id="businessUnit" style="font-weight: bold;" onchange="filterDepartments()">
+                        <option value="사업부" th:placeholder="사업부" disabled="disabled" selected>사업부</option>
+                        <option th:each="employee : ${employees}" th:value="${employee.dept_biz}" th:text="${employee.dept_biz}"></option>
+                    </select>
+                </div>
+                <!-- 부서 -->
+                <div class="col-md-4">
+                    <select class="form-control" id="department" style="font-weight: bold;">
+                        <option value="부서" th:placeholder="부서" disabled="disabled" selected>부서</option>
+                        <option th:each="employee : ${employees}" th:data-biz="${employee.dept_biz}" th:value="${employee.dept_group}" th:text="${employee.dept_group}"></option>
+                    </select>
+                </div>
+                <!-- 주민번호 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="#" required spellcheck="false">
+                        <span class="placeholder">주민번호</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 직급/직책/이메일 -->
+            <div class="row" style="padding-bottom:10px;">
+                <!-- 직급 -->
+                <div class="col-md-4">
+                    <select class="form-control" id="emp_rank_select" style="font-weight: bold;">
+                        <option value="직급" th:placeholder="직급" disabled="disabled" selected>직급</option>
+                        <option th:each="employee : ${employees}" th:value="${employee.emp_rank}" th:text="${employee.emp_rank}"></option>
+                    </select>
+                    <span class="placeholder"></span>
+                </div>
+                <!-- 직책 -->
+                <div class="col-md-4">
+                    <select class="form-control" id="emp_position_select" style="font-weight: bold;">
+                        <option value="직책" th:placeholder="직책" disabled="disabled" selected>직책</option>
+                        <option th:each="employee : ${employees}" th:value="${employee.work_pos}" th:text="${employee.work_pos}"></option>
+                    </select>
+                    <span class="placeholder"></span>
+                </div>
+                <!-- 이메일 -->
+                <div class="col-md-4">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="mail" required spellcheck="false">
+                        <span class="placeholder">이메일</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 주소 -->
+            <div class="row" style="padding-bottom:10px;">
+                <div class="col-md-12">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="address" required spellcheck="false">
+                        <span class="placeholder">주소</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 과제명/투입구분 -->
+            <div class="row" style="padding-bottom:10px;">
+                <!-- 과제명 -->
+                <div class="col-md-6">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="project_name" disabled spellcheck="false">
+                        <span class="placeholder">과제명</span>
+                    </div>
+                </div>
+                <!-- 투입구분 -->
+                <div class="col-md-6">
+                    <div class="input-block">
+                        <input type="text" name="input-text" id="name_eng" disabled spellcheck="false">
+                        <span class="placeholder">투입구분</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- -------------------------------------경력------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">경력</span> 
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_car', 'tableSelect_car')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_car')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>회사</th>
+                            <th>부서</th>
+                            <th>입사일</th>
+                            <th>퇴사일</th>
+                            <th>근속기간</th>
+							<th>최종직급</th>
+							<th>업무내용</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_car">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_car" value="mytable_car"></td>
+                            <td><input type="text" class="form-control" name="input-text" id="company"></td>
+                            <td><input type="text" class="form-control" name="input-text" id="department"></td>
+                            <td><input type="date" class="form-control" name="input-text" id="date_join"></td>
+                            <td><input type="date" class="form-control" name="input-text" id="date_leave"></td>
+                            <td><input type="text" class="form-control" name="input-text" id="work_period" placeholder="개월"></td>
+							<td><input type="text" class="form-control" name="input-text" id="final_rank"></td>
+							<td><input type="text" class="form-control" name="input-text" id="work_info"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------학력------------------------------------- -->
+        <!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">학력</span> 
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_edu', 'tableSelect_edu')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_edu')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>학교명</th>
+                            <th>입학일</th>
+                            <th>졸업일</th>
+                            <th>전공</th>
+                            <th>특이사항</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_edu">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_edu" value="mytable_edu"></td>
+                            <td><input type="text" class="form-control" name="name_school" id="name_school"></td>
+                            <td><input type="date" class="form-control" name="date_admition" id="date_admition"></td>
+                            <td><input type="date" class="form-control" name="date_graduate" id="date_graduate"></td>
+                            <td><input type="text" class="form-control" name="major" id="major"></td>
+                            <td><input type="text" class="form-control" name="comment" id="comment"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------기술사항------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">기술사항</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_tec', 'tableSelect_tec')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_tec')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>기술사항</th>
+                            <th>숙련도</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_tec">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_tec" value="mytable_tec"></td>
+                            <td><input type="text" class="form-control" name="tec_detail" id="tec_detail"></td>
+                            <td><input type="text" class="form-control" name="proficiency" id="proficiency"></td>
+                            <td><input type="text" class="form-control" name="note" id="note"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------가족관계------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">가족관계</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_fam', 'tableSelect_fam')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_fam')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>가족성명</th>
+                            <th>생년월일</th>
+                            <th>관계</th>
+                            <th>동거여부</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_fam">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_fam" value="mytable_fam"></td>
+                            <td><input type="text" class="form-control" name="name_family" id="name_family"></td>
+                            <td><input type="date" class="form-control" name="birth" id="birth"></td>
+                            <td><input type="text" class="form-control" name="rel" id="rel"></td>
+                            <td><input type="text" class="form-control" name="live" id="live"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------자격증------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">자격증</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_lic', 'tableSelect_lic')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_lic')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>자격증명</th>
+                            <th>취득일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_lic">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_lic" value="mytable_lic"></td>
+                            <td><input type="text" class="form-control" name="name_license" id="name_license"></td>
+                            <td><input type="date" class="form-control" name="date_acqui" id="date_acqui"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------교육이수------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">교육이수</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_ec', 'tableSelect_ec')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_ec')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>교육명</th>
+                            <th>시작일</th>
+                            <th>종료일</th>
+                            <th>교육기관</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_ec">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_ec" value="mytable_ec"></td>
+                            <td><input type="text" class="form-control" name="name_edu" id="name_edu"></td>
+                            <td><input type="date" class="form-control" name="date_start" id="date_start"></td>
+                            <td><input type="date" class="form-control" name="date_comp" id="date_comp"></td>
+                            <td><input type="text" class="form-control" name="edu_insti" id="edu_insti"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------상벌------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">상벌</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_rp', 'tableSelect_rp')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_rp')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>구분</th>
+                            <th>상벌명</th>
+                            <th>점수</th>
+                            <th>상벌일</th>
+                            <th>상벌내용</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_rp">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_rp" value="mytable_rp"></td>
+                            <td><input type="text" class="form-control" name="name_rew_gbn" id="name_rew_gbn"></td>
+                            <td><input type="text" class="form-control" name="name_rew_puni" id="name_rew_puni"></td>
+                            <td><input type="text" class="form-control" name="score" id="score"></td>
+                            <td><input type="date" class="form-control" name="date_rew_puni" id="date_rew_puni"></td>
+                            <td><input type="text" class="form-control" name="rew_note" id="rew_note"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- -------------------------------------직급/호봉------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <div class="col-md-12 scrollable" style="padding-bottom: 20px;">
+            <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                <span style="font-weight: bold;font-size: large;">직급/호봉</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_rs', 'tableSelect_rs')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_rs')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>직급</th>
+                            <th>호봉</th>
+                            <th>시작일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_rs">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_rs" value="mytable_rs"></td>
+                            <td><input type="text" class="form-control" name="rs_emp_rank" id="rs_emp_rank"></td>
+                            <td><input type="text" class="form-control" name="rs_salary" id="rs_salary" placeholder="만원"></td>
+                            <td><input type="date" class="form-control" name="rs_date_join" id="rs_date_join"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+		</div>
+        <!-- -------------------------------------과제현황------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2">
+                과제현황 
+                <button type="button" class="btn btn-primary" onclick="addTableRow('myTable_pm', 'tableSelect_pm')">+</button>
+                <button type="button" class="btn btn-danger" onclick="deleteTableRow('myTable_pm')">-</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>과제코드</th>
+                            <th>과제명</th>
+                            <th>투입기간</th>
+                            <th>시작일</th>
+                            <th>종료일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_pm">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_pm" value="mytable_pm"></td>
+                            <td><input type="text" class="form-control"></td>
+                            <td><input type="text" class="form-control"></td>
+                            <td><input type="text" class="form-control"></td>
+                            <td><input type="text" class="form-control"></td>
+                            <td><input type="text" class="form-control"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row" style="padding-bottom: 20px;">
+            <button id="saveButton" type="button" style="text-align: center;" class="btn btn-success" onclick="saveDataToServer()">저장</button>
+        </div>
+    </form>
+</div>
+</body>
+
+<div class="content" style="padding-bottom: 0;">
+<footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
+
+    <a class="text-muted">©norisystem Corp.</a><br>
+    <a th:href="@{http://www.norisystem.co.kr/}" target="_blank">Main Home / </a>
+    <a th:href="@{https://gw.norisystem.co.kr/ngw/app/#/}" target="_blank">GroupWare</a>
+    <br>
+
+</footer>
+</div>
+
+</body>
+</html>
