@@ -12,6 +12,8 @@
   <script type="text/javascript" th:src="@{/js/board_update.js}"></script>
   <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
    <script>
+   //담당자 모달에서의 사업부/부서 select 박스
+   //사업부 및 부서 별로 select 박스 나타나도록 
    document.addEventListener('DOMContentLoaded', function() {
          document.getElementById('businessUnit').addEventListener('change', function() {
            var businessUnit = this.value;
@@ -95,6 +97,7 @@
            genderOutput.value = "";
        }
    }
+   //+버튼을 눌렀을 때 테이블 추가
    function addTableRow(tableID, radioGroupName) {
        var table = document.getElementById(tableID);
 
@@ -131,6 +134,8 @@
            console.error("Table with ID '" + tableID + "' not found or has no rows or cells.");
        }
    }
+   
+   //-버튼을 눌렀을 때 라디오 버튼이 눌린 테이블 열 삭제
    function deleteTableRow(tableID) {
        try {
            var table = document.getElementById(tableID);
@@ -237,6 +242,7 @@
      });
    }
 
+   
    function previewImage(event) {
      var reader = new FileReader();
      reader.onload = function () {
@@ -252,6 +258,7 @@
  </script>
  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
  <style>
+   /* navigation 과 footer 상하단 고정을 위한 style */
     #wrap {
       min-height: calc(100% - 120px);
     }
