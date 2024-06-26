@@ -11,6 +11,8 @@
   <script src="js/board.js" th:src="@{js/board.js}"></script>
   <script type="text/javascript" src="js/session.js" th:src="@{js/session.js}" ></script>
    <script>
+   //담당자 모달에서의 사업부/부서 select 박스
+   //사업부 및 부서 별로 select 박스 나타나도록 
    document.addEventListener('DOMContentLoaded', function() {
          document.getElementById('businessUnit').addEventListener('change', function() {
            var businessUnit = this.value;
@@ -194,6 +196,7 @@ function previewImage(event) {
 </script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <style>
+    /* navigation 과 footer 상하단 고정을 위한 style */
     #wrap {
       min-height: calc(100% - 120px);
     }

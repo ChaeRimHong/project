@@ -13,6 +13,7 @@
   <script type="text/javascript" th:src="@{js/assign_update.js}"></script>
    -->
   <style>
+  /* navigation 과 footer 상하단 고정을 위한 style */
     #wrap {
       min-height: calc(100% - 120px);
     }
@@ -273,6 +274,7 @@ padding-bottom: 20px;
 }
 </style>
 <script th:inline="javascript">
+//db에서 가져온 데이터를 타임리프로 화면에 보여주고 자바스크립트에 가져다 쓰기 위함
     var employees_pmmanager = /*[[${employees}]]*/ [];
     var uniqueDeptBiz = /*[[${uniqueDeptBiz}]]*/ [];
     var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
