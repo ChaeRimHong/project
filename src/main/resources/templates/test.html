@@ -7,435 +7,506 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" th:href="@{/css/main.css?after}" />
-  <!-- <script src="js/test.js" th:href="@{/js/test.js?after}"></script> -->
+  <link rel="stylesheet" th:href="@{/css/board_update.css?after}" />
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
+  <script th:inline="javascript">
+    var employees_pmmanager = /*[[${employees}]]*/ [];
+    var uniqueDeptBiz = /*[[${uniqueDeptBiz}]]*/ [];
+    var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
+
+    /////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
+    $(document).ready(function(){
+        var employees = /*[[${employees}]]*/ []; // 타임리프를 통해 employees 데이터를 가져옴
+        var bizSet = new Set(); // 중복을 제거하기 위한 Set 생성
+        var deptSet = new Set(); // 중복을 제거하기 위한 Set 생성
+
+        // 검색 기능
+        $("#searchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#employeeList tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+
+        // employees 리스트를 순회하며 dept_biz 값 추출하여 Set에 추가
+        employees.forEach(function(employee) {
+            bizSet.add(employee.dept_biz);
+        });
+
+        // Set에서 값을 꺼내어 option 요소 생성
+        bizSet.forEach(function(biz) {
+            var option = document.createElement("option");
+            option.value = biz;
+            option.text = biz;
+            document.getElementById("bizFilter").appendChild(option);
+        });
+
+        // 사업부 필터링 시 부서 옵션 업데이트
+        $("#bizFilter").change(function(){
+            var selectedBiz = $(this).val();
+            deptSet.clear();
+            $("#deptFilter").empty().append('<option value="">전체</option>');
+            $("#employeeList tr").each(function(){
+                var row = $(this);
+                var biz = row.find("td:eq(3)").text();
+                if (biz === selectedBiz || selectedBiz === "") {
+                    var dept = row.find("td:eq(4)").text();
+                    deptSet.add(dept);
+                }
+            });
+            deptSet.forEach(function(dept) {
+                var option = document.createElement("option");
+                option.value = dept;
+                option.text = dept;
+                document.getElementById("deptFilter").appendChild(option);
+            });
+            filterEmployees();
+        });
+
+        // 부서 필터링 시 사원 목록 업데이트
+        $("#deptFilter").change(function(){
+            filterEmployees();
+        });
+
+        // 필터링 함수
+        function filterEmployees() {
+            var selectedBiz = $("#bizFilter").val();
+            var selectedDept = $("#deptFilter").val();
+            $("#employeeList tr").each(function(){
+                var row = $(this);
+                var biz = row.find("td:eq(3)").text();
+                var dept = row.find("td:eq(4)").text();
+                if ((biz === selectedBiz || selectedBiz === "") && (dept === selectedDept || selectedDept === "")) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            });
+        }
+
+        // 이미 추가된 사원들의 사번을 기억하는 배열
+        var addedEmployeeIds = [];
+
+        // 선택한 사원을 추가하는 함수
+        function addEmployee(row) {
+            var employeeData = [];
+            var columns = row.find("td");
+            columns.each(function() {
+                employeeData.push($(this).text());
+            });
+
+            var id = employeeData[1]; // 사번을 기준으로 중복 여부 확인
+            if (addedEmployeeIds.includes(id)) {
+                alert("이미 추가된 사원입니다.");
+                return;
+            }
+
+            // 태그로 선택된 사원 표시
+            addEmployeeTag(employeeData);
+
+            // 테이블에 선택한 사원을 추가합니다.
+            var table = $("#myTable_sawon");
+            var newRow = $("<tr>");
+            $("<td>").html("<input type='checkbox' class='employee-checkbox'>").appendTo(newRow);
+            $.each(employeeData.slice(1), function(i, val) {
+                $("<td>").html(val).appendTo(newRow);
+            });
+
+            // 아이콘을 포함한 span 요소 생성
+            var evaluateButton = $("<span>").addClass("glyphicon glyphicon-question-sign evaluate-btn").attr("aria-hidden", "true");
+            
+            // 평가 버튼 추가
+            var buttonCell = $("<td>").append(evaluateButton);
+            newRow.append(buttonCell);
+            newRow.appendTo(table);
+            addedEmployeeIds.push(id);
+            console.log("addedEmployeeIds = " + addedEmployeeIds);
+
+            // 평가 버튼 클릭 이벤트
+            evaluateButton.click(function() {
+                var employeeName = $(this).closest("tr").find("td:eq(2)").text(); // 해당 행의 사원 이름 가져오기
+                var employeeId = $(this).closest("tr").find("td:eq(1)").text(); // 해당 행의 사원 ID 가져오기
+                openEvaluationModal(employeeName, employeeId); // 모달 열기 함수 호출
+            });
+        }
+
+     // 선택된 사원 태그 추가 함수
+        function addEmployeeTag(employeeData) {
+            var tagContainer = $("#selectedEmployees");
+            var tag = $("<span>").addClass("label label-info employee-tag").text(employeeData[2]);
+            var removeIcon = $("<span>").addClass("glyphicon glyphicon-remove").css("margin-left", "5px");
+
+            tag.append(removeIcon);
+            tagContainer.append(tag);
+
+            // 선택된 사원 태그를 클릭하면 제거
+            tag.click(function() {
+                tag.remove();
+                var id = employeeData[1];
+                removeAddedEmployee(id);
+                $("#myTable_sawon tr").filter(function() {
+                    return $(this).find("td:eq(1)").text() === id;
+                }).remove();
+            });
+        }
+
+        $(document).ready(function() {
+            // 행 클릭 시 사원 추가
+            $("#employeeList").on("click", "tr", function() {
+                var row = $(this);
+                addEmployee(row);
+            });
+        });
+
+
+        // 모달 열기 함수
+        function openEvaluationModal(employeeName, employeeId) {
+            // 평가할 사원의 이름과 ID를 모달에 설정
+            $("#employeeName").text(employeeName);
+            // 여기에서 다른 필요한 정보도 모달에 설정할 수 있습니다.
+            // 모달을 열기
+            $("#evaluationModal").modal("show");
+        }
+
+        // '저장' 버튼 클릭 시 선택된 사원들을 테이블에 추가합니다.
+        $("#saveSelected").click(function(){
+            $("#employeeList input[type='checkbox']:checked").each(function(){
+                var row = $(this).closest("tr");
+                addEmployee(row);
+            });
+            // 모든 체크박스 선택 해제
+            $("#employeeList input[type='checkbox']").prop("checked", false);
+            // 모달 닫기
+            $("#myModal").modal("hide");
+        });
+
+        // 필터로 걸러진 사원만 전체 선택
+        $('#selectAll').change(function() {
+            var isChecked = $(this).prop('checked');
+            $('#employeeList tr:visible input[type="checkbox"]').prop('checked', isChecked);
+        });
+
+        // removeSelectedSawon 버튼 클릭 시 선택된 사원 삭제
+        $("#removeSelectedSawon").click(function(){
+            $("#myTable_sawon input[type='checkbox']:checked").each(function(){
+                var row = $(this).closest("tr");
+                var id = row.find("td:eq(1)").text(); // 사번을 기준으로 삭제
+                // 삭제 함수 호출
+                removeAddedEmployee(id);
+                // 행 삭제
+                row.remove();
+            });
+        });
+
+        // 추가된 사원 삭제 함수
+        function removeAddedEmployee(employeeId) {
+            // addedEmployees 배열에서 해당 사원의 인덱스를 찾습니다.
+            var index = addedEmployeeIds.indexOf(employeeId);
+            if (index !== -1) {
+                // 배열에서 해당 인덱스의 요소를 제거합니다.
+                addedEmployeeIds.splice(index, 1);
+            }
+
+            // 선택된 사원 태그에서도 제거
+            $(".employee-tag").filter(function() {
+                return $(this).text().trim() === employeeId;
+            }).remove();
+        }
+
+        // 행 클릭 시 사원 추가
+        $("#employeeList").on("click", "tr", function() {
+            $(this).find("input[type='checkbox']").prop("checked", true);
+        });
+    });
+    
+  </script>
 </head>
 <body>
-        <!-- 투입인력정보 -->
-        <div class="row" style="">
-            <div class="container">
-                <h5 style="font-weight: bold;">투입인력정보</h5>
-                <table class="table table-bordered table-hover" style="text-align: center;">
-                    <thead class="input-block">
-                        <tr>
-                            <th>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
-                                    <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
-                                </div>
-                            </th>
-                            <th>사번</th>
-                            <th>성명</th>
-                            <th>사업부</th>
-                            <th>그룹명</th>
-                            <th>직급</th>
-                            <th>휴대전화</th>
-                            <th>이메일</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myTable_sawon">
-                        <!-- 테이블 행 추가되는 부분 -->
-                    </tbody>
-                </table>
-            </div>
-            <!-- 모달 -->
-            <div id="myModal" class="modal fade" role="dialog">
-                <div class="modal-dialog modal-lg">
-                    <!-- 모달 내용 -->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">사원 선택</h4>
-                        </div>
-                        <div class="modal-body">
-                            <label for="deptFilter">부서 선택:</label>
-                            <select id="deptFilter" class="form-control">
-                                <option value="">전체</option> <!-- 전체 옵션 추가 -->
-                                <!-- 여기에 각 부서별 옵션을 추가하기 위한 JavaScript 코드가 들어갈 예정 -->
-                            </select>
-                            <br>
-                            <input type="text" id="searchInput" class="form-control" placeholder="검색...">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="selectAll"></th>
-                                        <th>사번</th>
-                                        <th>성명</th>
-                                        <th>사업부</th>
-                                        <th>그룹명</th>
-                                        <th>직급</th>
-                                        <th>휴대전화</th>
-                                        <th>이메일</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="employeeList">
-                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
-                                    <tr th:each="employee : ${employees}">
-                                        <td><input type="checkbox"></td>
-                                        <td th:text="${employee.emp_num}"></td>
-                                        <td th:text="${employee.name_kor}"></td>
-                                        <td th:text="${employee.dept_biz}"></td>
-                                        <td th:text="${employee.dept_group}"></td>
-                                        <td th:text="${employee.emp_rank}"></td>
-                                        <td th:text="${employee.phone}"></td>
-                                        <td th:text="${employee.mail}"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <!-- 페이징 컨트롤 -->
-                            <ul class="pagination" id="pageContent">
-                                <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
-                            </ul>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
+<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
+    
+<div><br><br></div>
+  <div class="container" style="padding-top: 20px;">
+    <!-- -------------------------------------투입인력정보 테이블------------------------------------- -->
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th style="width: 100px;">
+                  <button style="width: 30px; height: 30px; vertical-align: middle; font-weight: bold;" type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">+</button>
+                  <button style="width: 30px; height: 30px; vertical-align: middle; font-weight: bold;" type="button" class="btn btn-danger" id="removeSelectedSawon">-</button>
+              </th>
+              <th style="vertical-align: middle;">사번</th>
+              <th style="vertical-align: middle;">이름</th>
+              <th style="vertical-align: middle;">사업부</th>
+              <th style="vertical-align: middle;">부서</th>
+              <th style="vertical-align: middle;">직급</th>
+              <th style="vertical-align: middle;">평가</th>
+            </tr>
+          </thead>
+          <tbody id="myTable_sawon">
+            <!-- 선택한 사원의 정보가 추가될 영역 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+<!-- -------------------------------------투입인력추가 모달------------------------------------- -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="col-md-6 form-group">
+          <select class="form-control" id="bizFilter">
+            <option value="">사업부 선택</option>
+            <!-- 사업부 옵션이 추가될 영역 -->
+          </select>
         </div>
-<script type="text/javascript">
-var addedEmployees = [];
+        <div class="col-md-6 form-group">
+          <select class="form-control" id="deptFilter">
+            <option value="">부서 선택</option>
+            <!-- 부서 옵션이 추가될 영역 -->
+          </select>
+        </div>
+        <div class="col-md-12 form-group">
+          <input type="text" class="form-control" id="searchInput" placeholder="이름, 사업부, 부서 검색">
+        </div>
+        <!-- 선택된 사원을 표시할 태그 영역 -->
+        <div id="selectedEmployees" style="margin-bottom: 10px;">
+          <!-- 선택된 사원이 태그로 추가될 영역 -->
+        </div>
+        <div class="col-md-12 form-group">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>선택</th>
+              <th>사번</th>
+              <th>이름</th>
+              <th>사업부</th>
+              <th>부서</th>
+              <th>직급</th>
+            </tr>
+          </thead>
+          <tbody id="employeeList">
+            <!-- 전체 사원 목록이 추가될 영역 -->
+            <tr th:each="employee : ${employees}">
+              <td><input type="checkbox" th:id="${employee.emp_num}"></td>
+              <td th:text="${employee.emp_num}"></td>
+              <td th:text="${employee.name_kor}"></td>
+              <td th:text="${employee.dept_biz}"></td>
+              <td th:text="${employee.dept_group}"></td>
+              <td th:text="${employee.position}"></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <br>
+      <div class="modal-footer" style="border: none;">
+        <button type="button" class="btn btn-default" id="saveSelected" data-dismiss="modal">저장</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-/////////////////////////////////////담당자 모달창///////////////////////////////////////////////
-$(document).ready(function(){
-var employees_pmmanager = /*[[${employees}]]*/ [];
-var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
-
-$("#searchInput_pmamanager").on("keyup", function() {
-var value = $(this).val().toLowerCase();
-$("#employeeList_pmmanager tr").filter(function() {
-$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-});
-});
-
-$("#pm_nori_manager_Modal").on("show.bs.modal", function(){
-// 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
-$("#employeeList_pmmanager tr").each(function(){
-var row_pmmanager = $(this);
-
-row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
-row_pmmanager.on("click", function(){
-// 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
-$("#employeeList_pmmanager tr.selected").removeClass("selected");
-row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
-
-// 클릭한 행에서 각 셀의 정보 가져오기
-var columns_pm = row_pmmanager.find("td");
-var name_pm = columns_pm.eq(2).text(); // 담당자 이름
-var dept_pm = columns_pm.eq(3).text(); // 부서
-
-// 선택된 사원 데이터를 selectedEmployeeData_pmmanager 변수에 저장
-selectedEmployeeData_pmmanager.name = name_pm; // 담당자 이름 저장
-selectedEmployeeData_pmmanager.dept = dept_pm; // 부서 저장
-
-// 가져온 사원 정보를 입력란에 표시
-$("#pm_nori_manager").val(selectedEmployeeData_pmmanager.name); // 담당자 이름
-$("#pm_nori_bu").val(selectedEmployeeData_pmmanager.dept); // 부서
-
-// 모달을 닫음
-$("#pm_nori_manager_Modal").modal("hide");
-});
-});
-});
-
-// 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
-$("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
-$("#employeeList_pmmanager tr.selected").removeClass("selected");
-// 입력된 데이터 초기화를 하지 않습니다.
-});
-});
-
-/////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
-$(document).ready(function(){
-//부서 정보 추출
-var deptOptions = {};
-$("#employeeList tr").each(function(){
-var dept = $(this).find("td:eq(3)").text(); // 부서 정보 추출
-deptOptions[dept] = true; // 중복 제거를 위해 객체의 속성으로 저장
-});
-
-//부서 필터 select 요소에 옵션 추가
-var deptFilter = $("#deptFilter");
-for (var dept in deptOptions) {
-if (deptOptions.hasOwnProperty(dept)) {
-$("<option>").val(dept).text(dept).appendTo(deptFilter);
-}
-}
-
-
-//필터링 옵션 변경
-$('#deptFilter').change(function() {
-var selectedDept = $(this).val();
-if (selectedDept !== '') {
-$("#employeeList tr").each(function() {
-var dept = $(this).find("td:eq(3)").text(); // 각 행의 부서 정보 추출
-if (dept !== selectedDept) {
-$(this).hide(); // 선택된 부서가 아닌 행 숨기기
-} else {
-$(this).show(); // 선택된 부서와 일치하는 행 표시
-}
-});
-} else {
-$("#employeeList tr").show(); // 전체를 선택한 경우 모든 행 표시
-}
-});
-
-/////////////////////////시작일 완료일 개월수계산
-//시작일과 완료일 입력란의 변경 이벤트를 감지하여 기간을 자동으로 계산 (월 단위)
-$("#pm_start_date, #pm_end_date").on("change", function() {
-var startDate = new Date($("#pm_start_date").val()); // 시작일
-var endDate = new Date($("#pm_end_date").val()); // 완료일
-
-// 시작일과 완료일이 모두 유효한 경우에만 기간을 계산하고 입력란에 표시
-if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
-var diffMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12;
-diffMonths -= startDate.getMonth();
-diffMonths += endDate.getMonth();
-
-// 기간 입력란에 계산된 기간을 표시
-$("#pm_work_date").val(diffMonths);
-} else {
-// 시작일 또는 완료일이 유효하지 않은 경우 기간 입력란을 비움
-$("#pm_work_date").val("");
-}
-});
-});
-/////////////////////////////////////엑셀파일 추가///////////////////////////////////////////////////
-$(document).ready(function(){
-// + 버튼에 이벤트 처리 함수 연결
-$("#addExcelRowButton").click(function() {
-addTableRowExel('myTable_excel', 'tableSelect_excel');
-});
-
-// - 버튼에 이벤트 처리 함수 연결
-$("#deleteExcelRowButton").click(function() {
-deleteTableRowExel('myTable_excel');
-});
-
-//엑셀파일 +/-
-function addTableRowExel(tableID, radioGroupName) {
-console.log("addTableRowExel 실행됨")
-var table_excel = document.getElementById(tableID);
-
-// 새로운 행 생성
-var newRow_excel = table_excel.insertRow();
-
-// 첫 번째 셀에 라디오 버튼 추가
-var cell1_excel = newRow_excel.insertCell(0);
-var radioInput = document.createElement("input");
-radioInput.type = "radio";
-radioInput.name = radioGroupName;
-cell1_excel.appendChild(radioInput);
-
-// 두 번째 셀에 파일 선택 input 추가
-var cell2_excel = newRow_excel.insertCell(1);
-var fileInput_excel = document.createElement("input");
-fileInput_excel.type = "file";
-fileInput_excel.className = "form-control-file";
-cell2_excel.appendChild(fileInput_excel);
-}
-
-//엑셀 테이블 행 삭제 함수
-function deleteTableRowExel(tableID) {
-var table_excel = document.getElementById(tableID);
-var rowCount_excel = table_excel.rows.length;
-
-// 테이블의 각 행을 확인하여 체크된 라디오 버튼이 있는지 검사하고 삭제
-for (var i = 0; i < rowCount_excel; i++) {
-var row_excel = table_excel.rows[i];
-var radioInput = row_excel.cells[0].querySelector("input[type='radio']");
-if (radioInput.checked) {
-table_excel.deleteRow(i);
-rowCount_excel--;
-i--;
-}
-}
-}
-});
-
-
-/////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
-$(document).ready(function(){
-var employees = /*[[${employees}]]*/ []; // 타임리프를 통해 employees 데이터를 가져옴
-var select = document.getElementById("deptSelect");
-var deptSet = new Set(); // 중복을 제거하기 위한 Set 생성
-
-$("#searchInput").on("keyup", function() {
-var value = $(this).val().toLowerCase();
-$("#employeeList tr").filter(function() {
-$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-});
-});
-// employees 리스트를 순회하며 dept_biz 값 추출하여 Set에 추가
-employees.forEach(function(employee) {
-deptSet.add(employee.dept_biz);
-});
-
-// Set에서 값을 꺼내어 option 요소 생성
-deptSet.forEach(function(dept) {
-var option = document.createElement("option");
-option.value = dept;
-option.text = dept;
-select.appendChild(option);
-});
-
-// 이미 추가된 사원들의 사번을 기억하는 배열
-var addedEmployeeIds = [];
-
-// 선택한 사원을 추가하는 함수
-function addSelectedEmployees() {
-var selectedEmployees = [];
-var duplicateDetected = false;
-
-// 기존에 추가된 사원들의 사번을 배열에 추가합니다.
-$("#myTable_sawon tbody tr").each(function(){
-var employeeId = $(this).find("td:eq(1)").text(); // 사번 가져오기
-addedEmployeeIds.push(employeeId);
-});
-
-$("#employeeList input[type='checkbox']:checked").each(function(){
-var row = $(this).closest("tr");
-var columns = row.find("td");
-var employeeData = [];
-columns.each(function(){
-employeeData.push($(this).text());
-});
-
-var id = employeeData[1]; // 사번을 기준으로 중복 여부 확인
-if (addedEmployeeIds.includes(id)) {
-duplicateDetected = true;
-} else {
-selectedEmployees.push(employeeData);
-}
-});
-
-// 테이블에 선택한 사원들을 추가합니다.
-var table = $("#myTable_sawon");
-$.each(selectedEmployees, function(index, value){
-var newRow = $("<tr>");
-// 첫 번째 셀에만 체크박스 추가
-$("<td>").html("<input type='checkbox' class='employee-checkbox'>").appendTo(newRow);
-$.each(value.slice(1), function(i, val){
-// 나머지 셀 추가
-$("<td>").html(val).appendTo(newRow);
-});
-newRow.appendTo(table);
-addedEmployeeIds.push(value[1]); // 사번을 addedEmployeeIds 배열에 추가
-console.log("addedEmployeeIds = "+addedEmployeeIds)
-});
-
-// 모달을 닫습니다.
-$("#myModal").modal("hide");
-}
-
-// '선택 추가' 버튼 클릭 시 선택된 사원을 테이블에 추가합니다.
-$("#addSelected").click(function(){
-addSelectedEmployees();
-});
-
-// 필터로 걸러진 사원만 전체 선택
-$('#selectAll').change(function() {
-var isChecked = $(this).prop('checked');
-$('#employeeList tr:visible input[type="checkbox"]').prop('checked', isChecked);
-});
-
-// removeSelectedSawon 버튼 클릭 시 선택된 사원 삭제
-$("#removeSelectedSawon").click(function(){
-$("#myTable_sawon input[type='checkbox']:checked").each(function(){
-var row = $(this).closest("tr");
-var id = row.find("td:eq(1)").text(); // 사번을 기준으로 삭제
-// 삭제 함수 호출
-removeAddedEmployee(id);
-// 행 삭제
-row.remove();
-});
-});
-
-// 추가된 사원 삭제 함수
-function removeAddedEmployee(employeeId) {
-// addedEmployees 배열에서 해당 사원의 인덱스를 찾습니다.
-var index = addedEmployees.indexOf(employeeId);
-if (index !== -1) {
-// 배열에서 해당 인덱스의 요소를 제거합니다.
-addedEmployees.splice(index, 1);
-}
-}
-
-
-// select 박스 선택시 미리보기 안보이게
-$('select').on('mousedown', function() {
-$(this).siblings('.placeholder').css('display', 'none');
-});
-
-// 저장 버튼에 이벤트 처리 함수 연결
-$("#saveButton").click(function() {
-saveDataToServer();
-});
-
-// 저장 함수 정의
-function saveDataToServer() {
-// FormData 생성
-var formData = new FormData();
-
-// 과제 정보 수집
-formData.append('pm_code', $('#pm_code').val());
-formData.append('pm_name', $('#pm_name').val());
-formData.append('pm_nori_manager', $('#pm_nori_manager').val());
-formData.append('pm_nori_bu', $('#pm_nori_bu').val());
-formData.append('pm_create_date', $('#pm_create_date').val());
-formData.append('pm_manager', $('#pm_manager').val());
-formData.append('pm_bu', $('#pm_bu').val());
-formData.append('pm_business', $('#pm_business').val());
-formData.append('pm_price', $('#pm_price').val());
-formData.append('pm_workload', $('#pm_workload').val());
-formData.append('pm_full', $('#pm_full').val());
-formData.append('pm_part', $('#pm_part').val());
-formData.append('pm_suggest_date', $('#pm_suggest_date').val());
-formData.append('pm_start_date', $('#pm_start_date').val());
-formData.append('pm_end_date', $('#pm_end_date').val());
-formData.append('pm_work_date', $('#pm_work_date').val());
-formData.append('pm_status', $('#pm_status').val());
-formData.append('pm_outline', $('#pm_outline').val());
-formData.append('pm_bego', $('#pm_bego').val());
-formData.append('comment', $('#comment').val());
-
-// 투입인력 정보 수집
-// 추가한 사원들의 사번을 formData에 추가
-console.log("add 시 addedEmployeeIds : "+addedEmployeeIds)
-addedEmployeeIds.forEach(function(employeeId) {
-formData.append('addedEmployeeIds', employeeId);
-});
-
-// 파일 업로드 처리
-var fileInputs = document.getElementById('pm_file').files;
-if (fileInputs.length > 0) {
-for (var i = 0; i < fileInputs.length; i++) {
-formData.append('pm_file', fileInputs[i]);
-}
-}
-
-// Ajax를 이용하여 서버로 데이터 전송
-$.ajax({
-url: '/updateTask', // 수정된 부분
-type: 'POST',
-data: formData,
-processData: false,
-contentType: false,
-success: function(response) {
-// 성공적으로 저장되었을 때의 동작
-console.log('데이터가 성공적으로 서버에 전송되었습니다.');
-},
-error: function(xhr, status, error) {
-// 에러 발생 시의 동작
-console.error('데이터 전송 중 오류가 발생했습니다:', error);
-}
-});
-}
-
-});
-
-</script>
+<!-- -------------------------------------평가 모달------------------------------------- -->
+<div id="evaluationModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title" style="vertical-align: middle;">사원 평가</h4>
+      </div>
+      <div class="modal-body">
+        <p>사원 이름: <span id="employeeName"></span></p>
+        <!-- 각 사원의 평가를 구분하기 위해 employeeId 추가 -->
+        <input type="hidden" id="employeeId">
+        <div class="col-md-12">
+          <!-- 직무평가 -->
+          <select class="form-control" id="tech_gbn" name="tech_gbn">
+            <option value="" selected>직무평가</option>
+            <option value="상">상</option>
+            <option value="중">중</option>
+            <option value="하">하</option>
+          </select>
+          <div class="form-group">
+            <textarea class="form-control" rows="5" id="tech_comment" placeholder="직무평가 내용"></textarea>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <!-- 근태평가 -->
+          <select class="form-control" id="user_gbn" name="user_gbn">
+            <option value="" selected>근태평가</option>
+            <option value="상">상</option>
+            <option value="중">중</option>
+            <option value="하">하</option>
+          </select>
+          <div class="form-group">
+            <textarea class="form-control" rows="5" id="user_comment" placeholder="근태평가 내용"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border: none;">
+        <button type="button" class="btn btn-default" onclick="saveEvaluation()">저장</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
+<script>
+$(document).ready(function(){
+	var savedEvaluations = {}; // 평가를 저장할 객체 정의
+
+	// openEvaluationModal 함수를 전역 스코프로 옮깁니다.
+	function openEvaluationModal(employeeName, employeeId) {
+	    // 사원의 이름과 ID를 모달에 설정합니다.
+	    $("#employeeName").text(employeeName);
+	    // 모달을 엽니다.
+	    $("#evaluationModal").modal("show");
+	}
+    // 평가 버튼 클릭 이벤트
+    $(document).on("click", ".evaluate-btn", function() {
+        var employeeName = $(this).closest("tr").find("td:eq(2)").text(); // 해당 행의 사원 이름 가져오기
+        var employeeId = $(this).closest("tr").find("td:eq(1)").text(); // 해당 행의 사원 ID 가져오기
+        openEvaluationModal(employeeName, employeeId); // 모달 열기 함수 호출
+    });
+
+    // 모달이 열릴 때마다 이벤트를 바인딩합니다.
+    $('#evaluationModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // 모달을 연 버튼
+        var employeeName = button.closest("tr").find("td:eq(2)").text(); // 선택된 사원의 이름
+        var employeeId = button.closest("tr").find("td:eq(1)").text(); // 선택된 사원의 사번
+        $("#employeeName").text(employeeName);
+        $("#employeeId").val(employeeId); // 평가 모달에 선택된 사원의 사번을 저장합니다.
+        
+        // 이미 해당 사원에 대한 평가가 있으면 가져와서 표시합니다.
+        // 예를 들어, savedEvaluations[employeeId] 형태로 해당 사원의 평가 데이터를 관리합니다.
+        var savedEvaluation = savedEvaluations[employeeId];
+        if (savedEvaluation) {
+          $("#tech_gbn").val(savedEvaluation.tech_gbn);
+          $("#tech_comment").val(savedEvaluation.tech_comment);
+          $("#user_gbn").val(savedEvaluation.user_gbn);
+          $("#user_comment").val(savedEvaluation.user_comment);
+        } else {
+          // 평가가 없으면 기본값으로 설정합니다.
+          $("#tech_gbn").val("");
+          $("#tech_comment").val("");
+          $("#user_gbn").val("");
+          $("#user_comment").val("");
+        }
+    });
+
+    // 저장 버튼 클릭 시 평가 저장
+    window.saveEvaluation = function() {
+        var employeeId = $("#employeeId").val();
+        var tech_gbn = $("#tech_gbn").val();
+        var tech_comment = $("#tech_comment").val();
+        var user_gbn = $("#user_gbn").val();
+        var user_comment = $("#user_comment").val();
+
+        // 평가 데이터를 저장합니다. 예를 들어, savedEvaluations[employeeId] 형태로 관리합니다.
+        savedEvaluations[employeeId] = {
+          tech_gbn: tech_gbn,
+          tech_comment: tech_comment,
+          user_gbn: user_gbn,
+          user_comment: user_comment
+        };
+
+        // 저장 후 모달을 닫습니다.
+        $('#evaluationModal').modal('hide');
+    };
+});
+$(document).ready(function(){
+    var addedEmployeeIds = []; // 이미 추가된 사원의 사번을 기억하는 배열
+
+    // 모달이 열릴 때마다 체크박스 상태 업데이트
+    $('#myModal').on('show.bs.modal', function (event) {
+        // 기존에 추가된 사원들의 체크박스 체크
+        $("#employeeList input[type='checkbox']").each(function(){
+            var empNum = $(this).attr('id');
+            if (addedEmployeeIds.includes(empNum)) {
+                $(this).prop('checked', true);
+            } else {
+                $(this).prop('checked', false);
+            }
+        });
+    });
+
+    // '+' 버튼 클릭 시 선택된 사원 추가
+    $("#saveSelected").click(function(){
+        $("#employeeList input[type='checkbox']:checked").each(function(){
+            var row = $(this).closest("tr");
+            var empNum = row.find("td:eq(1)").text(); // 사번 가져오기
+            if (!addedEmployeeIds.includes(empNum)) {
+                addEmployee(row);
+                addedEmployeeIds.push(empNum);
+            }
+        });
+        $('#myModal').modal('hide');
+    });
+
+    // 이미 추가된 사원 삭제
+    $("#removeSelectedSawon").click(function(){
+        $("#myTable_sawon input[type='checkbox']:checked").each(function(){
+            var row = $(this).closest("tr");
+            var empNum = row.find("td:eq(1)").text(); // 사번 가져오기
+            removeAddedEmployee(empNum);
+            row.remove();
+        });
+    });
+
+    // 선택된 사원 추가 함수
+    function addEmployee(row) {
+        // 추가할 사원 정보 가져오기
+        var employeeData = [];
+        var columns = row.find("td");
+        columns.each(function() {
+            employeeData.push($(this).text());
+        });
+
+        // 테이블에 선택한 사원 추가
+        var table = $("#myTable_sawon");
+        var newRow = $("<tr style='vertical-align: middle;'>");
+        $("<td>").html("<input type='checkbox' class='employee-checkbox'>").appendTo(newRow);
+        $.each(employeeData.slice(1), function(i, val) {
+            $("<td>").html(val).appendTo(newRow);
+        });
+
+        // 아이콘을 포함한 span 요소 생성
+        var evaluateButton = $("<span>").addClass("glyphicon glyphicon-question-sign evaluate-btn").attr("aria-hidden", "true");
+        // 평가 버튼 추가
+        var buttonCell = $("<td>").append(evaluateButton);
+        newRow.append(buttonCell);
+        newRow.appendTo(table);
+
+        // 평가 버튼 클릭 이벤트
+        evaluateButton.click(function() {
+            var employeeName = $(this).closest("tr").find("td:eq(2)").text(); // 해당 행의 사원 이름 가져오기
+            var employeeId = $(this).closest("tr").find("td:eq(1)").text(); // 해당 행의 사원 ID 가져오기
+            openEvaluationModal(employeeName, employeeId); // 모달 열기 함수 호출
+        });
+    }
+
+    // 이미 추가된 사원 삭제 함수
+    function removeAddedEmployee(employeeId) {
+        // 배열에서 해당 사원의 인덱스 찾기
+        var index = addedEmployeeIds.indexOf(employeeId);
+        if (index !== -1) {
+            addedEmployeeIds.splice(index, 1); // 배열에서 제거
+        }
+    }
+
+    // 모달 열기 함수
+    function openEvaluationModal(employeeName, employeeId) {
+        // 평가할 사원의 이름과 ID를 모달에 설정
+        $("#employeeName").text(employeeName);
+        // 모달 열기
+        $("#evaluationModal").modal("show");
+    }
+});
+</script>
+
 </html>

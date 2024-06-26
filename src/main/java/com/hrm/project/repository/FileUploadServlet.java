@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-//import javax.servlet.annotation.WebServlet;
-//import javax.servlet.http.HttpServlet;
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//import javax.servlet.ServletException;
-//import javax.servlet.http.Part;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.http.Part;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,8 +49,15 @@ public class FileUploadServlet {
                     dir.mkdirs(); // 경로가 존재하지 않으면 생성
                 }
                 System.out.println("FileUploadServlet 로직 타는중");
-                // 파일을 저장할 경로 설정
-                String filePath = uploadDir + file.getOriginalFilename();
+
+                // 파일 이름 추출
+                String originalFilename = file.getOriginalFilename();
+
+                // 확장자 추출
+                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+
+                // 파일 저장 경로 설정
+                String filePath = uploadDir + empNum + extension;
                 file.transferTo(new File(filePath));
         
                 // 업로드된 파일 이름을 반환

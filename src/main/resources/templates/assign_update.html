@@ -7,12 +7,35 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
   <!-- 
   <link rel="stylesheet" th:href="@{css/assign_update.css}" />
   <script type="text/javascript" th:src="@{js/assign_update.js}"></script>
    -->
-<style type="text/css">
+  <style>
+    #wrap {
+      min-height: calc(100% - 120px);
+    }
+    html,
+    body {
+      height: 100%;
+      padding: 0px;
+      margin: 0px;
+    }
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    .content {
+      margin-bottom: 50px; /* Footer 높이만큼 여백 추가 */
+      overflow-y: auto; /* 스크롤이 필요할 때만 스크롤바 표시 */
+    }
     /* 모달 너비를 조정하는 CSS */
     .modal-lg {
       width: 80%; /* 모달 너비를 80%로 조정 */
@@ -126,40 +149,73 @@ div.input-block span.placeholder {
     #pm_create_date:valid + span.placeholder,
     #pm_create_date:focus + span.placeholder, 
     #pm_manager:valid + span.placeholder,
-    #pm_manager:focus + span.placeholder, 
-    #pm_bu:valid + span.placeholder,
-    #pm_bu:focus + span.placeholder,
-    #pm_business:valid + span.placeholder,
-    #pm_business:focus + span.placeholder,
-    #pm_full:valid + span.placeholder,
-    #pm_full:focus + span.placeholder,
-    #pm_part:valid + span.placeholder,
-    #pm_part:focus + span.placeholder,
-    #pm_workload:valid + span.placeholder,
-    #pm_workload:focus + span.placeholder,
+    #pm_manager:focus + span.placeholder,
     #pm_price:valid + span.placeholder,
     #pm_price:focus + span.placeholder {
   font:italic;
   transform: scale(1.0) translateX(230px);
   font-style: italic; /* 입력시 기울기기 글꼴 */
 }
+
+    #pm_part:valid + span.placeholder,
+    #pm_part:focus + span.placeholder,
+    #pm_bu:valid + span.placeholder,
+    #pm_bu:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(250px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+}
+
+    #pm_full:valid + span.placeholder,
+    #pm_full:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(260px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+}
+
+    #pm_business:valid + span.placeholder,
+    #pm_business:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(270px);
+  font-style: italic; /* 입력시 기울기기 글꼴 */
+}
+    
     #pm_suggest_date:valid + span.placeholder,
     #pm_suggest_date:focus + span.placeholder,
     #pm_start_date:valid + span.placeholder,
     #pm_start_date:focus + span.placeholder,
     #pm_end_date:valid + span.placeholder,
-    #pm_end_date:focus + span.placeholder {
+    #pm_end_date:focus + span.placeholder, 
+    #dev_model:valid + span.placeholder,
+    #dev_model:focus + span.placeholder, 
+    #os:valid + span.placeholder,
+    #os:focus + span.placeholder, 
+    #language:valid + span.placeholder,
+    #language:focus + span.placeholder, 
+    #dbms:valid + span.placeholder,
+    #dbms:focus + span.placeholder, 
+    #tool:valid + span.placeholder,
+    #tool:focus + span.placeholder, 
+    #WAS:valid + span.placeholder,
+    #WAS:focus + span.placeholder, 
+    #other:valid + span.placeholder,
+    #other:focus + span.placeholder {
   font:italic;
   transform: scale(1.0) translateX(160px);
   font-style: italic; /* 입력시 기울기기 글꼴 */
 }
 
-    /* pm_code와 pm_name에 대한 개별 스타일링 */
-    #pm_code_date:not(:placeholder-shown) + span.placeholder,
-    #pm_code_date:focus + span.placeholder, 
+    /* pm_code에 대한 개별 스타일링 */
+    #pm_code:not(:placeholder-shown) + span.placeholder,
+    #pm_code:focus + span.placeholder{
+      transform: scale(1.0) translateX(260px);
+      font-style: italic; /* 입력시 기울기기 글꼴 */
+    }
+    
+    /* pm_name에 대한 개별 스타일링 */
     #pm_name:not(:placeholder-shown) + span.placeholder,
     #pm_name:focus + span.placeholder {
-      transform: scale(1.0) translateX(440px);
+      transform: scale(1.0) translateX(660px);
       font-style: italic; /* 입력시 기울기기 글꼴 */
     }
     
@@ -182,7 +238,7 @@ div.input-block span.placeholder {
     #pm_nori_bu:focus + span.placeholder, 
     #pm_workload:not(:placeholder-shown) + span.placeholder,
     #pm_workload:focus + span.placeholder {
-      transform: scale(1.0) translateX(280px);
+      transform: scale(1.0) translateX(290px);
       font-style: italic;
     }
     
@@ -216,6 +272,11 @@ overflow-y: auto; /* 세로 스크롤 활성화 */
 padding-bottom: 20px;    
 }
 </style>
+<script th:inline="javascript">
+    var employees_pmmanager = /*[[${employees}]]*/ [];
+    var uniqueDeptBiz = /*[[${uniqueDeptBiz}]]*/ [];
+    var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
+</script>
 <script type="text/javascript">
 function getCurrentDateTime() {
     var currentDate = new Date();
@@ -240,60 +301,153 @@ function padZero(num) {
 
 // 입력 필드에 현재 날짜 및 시간 설정
 document.getElementById
+
+/////////////////////////////////////공수///////////////////////////////////////////////
+$(document).ready(function(){
+    var pmFullInput = document.getElementById("pm_full");
+    var pmPartInput = document.getElementById("pm_part");
+    var pmWorkloadInput = document.getElementById("pm_workload");
+
+    function calculateWorkload() {
+        var pmFullValue = parseFloat(pmFullInput.value) || 0;
+        var pmPartValue = parseFloat(pmPartInput.value) || 0;
+        var workload = pmFullValue + pmPartValue;
+        pmWorkloadInput.value = workload;
+    }
+
+    if (pmFullInput && pmPartInput && pmWorkloadInput) {
+        // 초기값 설정
+        calculateWorkload();
+
+        // 값 변경 이벤트에 대한 리스너 추가
+        pmFullInput.addEventListener("input", calculateWorkload);
+        pmPartInput.addEventListener("input", calculateWorkload);
+    }
+});
 </script>
 <script type="text/javascript">
-var addedEmployees = [];
+    var addedEmployees = [];
 
-/////////////////////////////////////담당자 모달창///////////////////////////////////////////////
-$(document).ready(function(){
-var employees_pmmanager = /*[[${employees}]]*/ [];
-var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
+    /////////////////////////////////////담당자 모달창///////////////////////////////////////////////
+    $(document).ready(function(){
+       console.log("모달 오픈");
+        var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
+        console.log("uniqueDeptBiz: ", uniqueDeptBiz);
+        console.log("uniqueDeptGroup: ", uniqueDeptGroup);
 
-$("#searchInput_pmamanager").on("keyup", function() {
-var value = $(this).val().toLowerCase();
-$("#employeeList_pmmanager tr").filter(function() {
-$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-});
-});
+        // 사업부와 부서 select 박스 옵션 추가
+        uniqueDeptBiz.forEach(function(dept) {
+            $("#selectDeptBiz").append(new Option(dept, dept));
+        });
+      
+        uniqueDeptGroup.forEach(function(group) {
+            $("#selectDeptGroup").append(new Option(group, group));
+        });
+    
+        // 검색 필터
+        $("#searchInput_pmamanager").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#employeeList_pmmanager tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    
+        // 사업부 및 부서 선택 필터링
+        $("#selectDeptBiz, #selectDeptGroup").on("change", function() {
+            var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
+            var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
+            $("#employeeList_pmmanager tr").each(function() {
+                var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+                var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+                $(this).toggle(bizMatch && groupMatch);
+            });
+        });
+    
+        // #selectDeptBiz 값이 변경될 때 #selectDeptGroup의 선택값 초기화 및 필터링 재적용
+        $("#selectDeptBiz").on("change", function() {
+            $("#selectDeptGroup").val(""); // #selectDeptGroup의 선택값 초기화
+        
+            var selectedDeptBiz = $(this).val().toLowerCase();
+            var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
+            $("#employeeList_pmmanager tr").each(function() {
+                var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+                var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+                $(this).toggle(bizMatch && groupMatch);
+            });
+        });
 
-$("#pm_nori_manager_Modal").on("show.bs.modal", function(){
-// 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
-$("#employeeList_pmmanager tr").each(function(){
-var row_pmmanager = $(this);
-
-row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
-row_pmmanager.on("click", function(){
-// 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
-$("#employeeList_pmmanager tr.selected").removeClass("selected");
-row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
-
-// 클릭한 행에서 각 셀의 정보 가져오기
-var columns_pm = row_pmmanager.find("td");
-var name_pm = columns_pm.eq(2).text(); // 담당자 이름
-var dept_pm = columns_pm.eq(3).text(); // 부서
-
-// 선택된 사원 데이터를 selectedEmployeeData_pmmanager 변수에 저장
-selectedEmployeeData_pmmanager.name = name_pm; // 담당자 이름 저장
-selectedEmployeeData_pmmanager.dept = dept_pm; // 부서 저장
-
-// 가져온 사원 정보를 입력란에 표시
-$("#pm_nori_manager").val(selectedEmployeeData_pmmanager.name); // 담당자 이름
-$("#pm_nori_bu").val(selectedEmployeeData_pmmanager.dept); // 부서
-
-// 모달을 닫음
-$("#pm_nori_manager_Modal").modal("hide");
-});
-});
-});
-
-// 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
-$("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
-$("#employeeList_pmmanager tr.selected").removeClass("selected");
-// 입력된 데이터 초기화를 하지 않습니다.
-});
-});
-
-/////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
+        //#selectDeptGroup 값이 변경될 때 필터링 적용
+        $("#selectDeptGroup").on("change", function() {
+            var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
+            var selectedDeptGroup = $(this).val().toLowerCase();
+            $("#employeeList_pmmanager tr").each(function() {
+                var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+                var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+                $(this).toggle(bizMatch && groupMatch);
+            });
+        });
+    
+        // #selectDeptGroup 값이 변경될 때 사업부에 따라 선택 가능한 부서만 보이도록 설정
+        $("#selectDeptBiz").on("change", function() {
+            var selectedDeptBiz = $(this).val().toLowerCase();
+            
+            // 모든 부서 옵션 숨기기
+            $("#selectDeptGroup option").hide();
+        
+            // 선택된 사업부에 해당하는 부서 옵션 보이기
+            $("#employeeList_pmmanager tr").each(function() {
+                var deptBiz = $(this).find("td").eq(3).text().toLowerCase();
+                var deptGroup = $(this).find("td").eq(4).text();
+                if (deptBiz === selectedDeptBiz) {
+                    $("#selectDeptGroup option[value='" + deptGroup + "']").show();
+                }
+            });
+        
+            // 부서 선택 초기화
+            $("#selectDeptGroup").val("");
+        });
+        
+        $(document).on("show.bs.modal", "#pm_nori_manager_Modal", function(){
+            // 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
+            $("#employeeList_pmmanager").find("tr").each(function(){
+                var row_pmmanager = $(this);
+                console.log("행 클릭됨");
+        
+                row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
+                row_pmmanager.on("click", function(){
+                    // 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
+                    $("#employeeList_pmmanager tr.selected").removeClass("selected");
+                    row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
+        
+                    // 클릭한 행에서 각 셀의 정보 가져오기
+                    var columns_pm = row_pmmanager.find("td");
+                    var name_pm = columns_pm.eq(2).text(); // 담당자 이름
+                    var dept_pm = columns_pm.eq(3).text(); // 부서
+                    
+                    console.log("담당자 이름:", name_pm);
+                    console.log("부서:", dept_pm);
+        
+                    // 선택된 사원 데이터를 selectedEmployeeData_pmmanager 변수에 저장
+                    selectedEmployeeData_pmmanager.name = name_pm; // 담당자 이름 저장
+                    selectedEmployeeData_pmmanager.dept = dept_pm; // 부서 저장
+                    
+                    // 가져온 사원 정보를 입력란에 표시
+                    $("#pm_nori_manager").val(selectedEmployeeData_pmmanager.name); // 담당자 이름
+                    $("#pm_nori_bu").val(selectedEmployeeData_pmmanager.dept); // 부서
+        
+                   
+                    // 모달을 닫음
+                    $("#pm_nori_manager_Modal").modal("hide");
+                });
+            });
+        });
+        // 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
+        $("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
+            $("#employeeList_pmmanager tr.selected").removeClass("selected");
+            // 입력된 데이터 초기화를 하지 않습니다.
+        });
+    });
+/////////////////////////////////////투입인력정보 모달창/사업부,부서 필터링///////////////////////////////////////////////
 $(document).ready(function(){
 //부서 정보 추출
 var deptOptions = {};
@@ -404,255 +558,284 @@ i--;
 
 /////////////////////////////////////투입인력정보 모달창///////////////////////////////////////////////
 $(document).ready(function(){
-var employees = /*[[${employees}]]*/ []; // 타임리프를 통해 employees 데이터를 가져옴
-var select = document.getElementById("deptSelect");
-var deptSet = new Set(); // 중복을 제거하기 위한 Set 생성
+    var employees = /*[[${employees}]]*/ []; // 타임리프를 통해 employees 데이터를 가져옴
+    var bizSet = new Set(); // 중복을 제거하기 위한 Set 생성
+    var deptSet = new Set(); // 중복을 제거하기 위한 Set 생성
 
-$("#searchInput").on("keyup", function() {
-var value = $(this).val().toLowerCase();
-$("#employeeList tr").filter(function() {
-$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-});
-});
-// employees 리스트를 순회하며 dept_biz 값 추출하여 Set에 추가
-employees.forEach(function(employee) {
-deptSet.add(employee.dept_biz);
-});
+    // 검색 기능
+    $("#searchInput").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#employeeList tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
 
-// Set에서 값을 꺼내어 option 요소 생성
-deptSet.forEach(function(dept) {
-var option = document.createElement("option");
-option.value = dept;
-option.text = dept;
-select.appendChild(option);
-});
+    // employees 리스트를 순회하며 dept_biz 값 추출하여 Set에 추가
+    employees.forEach(function(employee) {
+        bizSet.add(employee.dept_biz);
+    });
 
-// 이미 추가된 사원들의 사번을 기억하는 배열
-var addedEmployeeIds = [];
+    // Set에서 값을 꺼내어 option 요소 생성
+    bizSet.forEach(function(biz) {
+        var option = document.createElement("option");
+        option.value = biz;
+        option.text = biz;
+        document.getElementById("bizFilter").appendChild(option);
+    });
+
+    // 사업부 필터링 시 부서 옵션 업데이트
+    $("#bizFilter").change(function(){
+        var selectedBiz = $(this).val();
+        deptSet.clear();
+        $("#deptFilter").empty().append('<option value="">전체</option>');
+        $("#employeeList tr").each(function(){
+            var row = $(this);
+            var biz = row.find("td:eq(3)").text();
+            if (biz === selectedBiz || selectedBiz === "") {
+                var dept = row.find("td:eq(4)").text();
+                deptSet.add(dept);
+            }
+        });
+        deptSet.forEach(function(dept) {
+            var option = document.createElement("option");
+            option.value = dept;
+            option.text = dept;
+            document.getElementById("deptFilter").appendChild(option);
+        });
+        filterEmployees();
+    });
+
+    // 부서 필터링 시 사원 목록 업데이트
+    $("#deptFilter").change(function(){
+        filterEmployees();
+    });
+
+    // 필터링 함수
+    function filterEmployees() {
+        var selectedBiz = $("#bizFilter").val();
+        var selectedDept = $("#deptFilter").val();
+        $("#employeeList tr").each(function(){
+            var row = $(this);
+            var biz = row.find("td:eq(3)").text();
+            var dept = row.find("td:eq(4)").text();
+            if ((biz === selectedBiz || selectedBiz === "") && (dept === selectedDept || selectedDept === "")) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+    }
+
+    // 이미 추가된 사원들의 사번을 기억하는 배열
+    var addedEmployeeIds = [];
 
 // 선택한 사원을 추가하는 함수
 function addSelectedEmployees() {
-var selectedEmployees = [];
-var duplicateDetected = false;
+    var selectedEmployees = [];
+    var duplicateDetected = false;
 
-// 기존에 추가된 사원들의 사번을 배열에 추가합니다.
-$("#myTable_sawon tbody tr").each(function(){
-var employeeId = $(this).find("td:eq(1)").text(); // 사번 가져오기
-addedEmployeeIds.push(employeeId);
+    // 기존에 추가된 사원들의 사번을 배열에 추가합니다.
+    $("#employeeList input[type='checkbox']:checked").each(function(){
+        var row = $(this).closest("tr");
+        var columns = row.find("td");
+        var employeeData = [];
+        columns.each(function(){
+            employeeData.push($(this).text());
+        });
+
+        var id = employeeData[1]; // 사번을 기준으로 중복 여부 확인
+        if (addedEmployeeIds.includes(id)) {
+            duplicateDetected = true;
+        } else {
+            selectedEmployees.push(employeeData);
+            addedEmployeeIds.push(id); // 추가된 사원의 사번을 배열에 추가
+        }
+    });
+
+        // 테이블에 선택한 사원들을 추가합니다.
+        var table = $("#myTable_sawon");
+        $.each(selectedEmployees, function(index, value){
+            var newRow = $("<tr>");
+            // 첫 번째 셀에만 체크박스 추가
+            $("<td>").html("<input type='checkbox' class='employee-checkbox'>").appendTo(newRow);
+            $.each(value.slice(1), function(i, val){
+                // 나머지 셀 추가
+                $("<td>").html(val).appendTo(newRow);
+            });
+            
+            // 아이콘을 포함한 span 요소 생성
+            var evaluateButton = $("<span>").addClass("glyphicon glyphicon-question-sign evaluate-btn").attr("aria-hidden", "true");
+        
+            // 평가 버튼 추가
+            var buttonCell = $("<td>").append(evaluateButton); // 버튼을 담을 셀
+            newRow.append(buttonCell); // 행에 셀 추가
+        
+            newRow.appendTo(table);
+            console.log("addedEmployeeIds = "+addedEmployeeIds);
+            // 평가 버튼 클릭 이벤트
+            evaluateButton.click(function() {
+                var employeeName = $(this).closest("tr").find("td:eq(2)").text(); // 해당 행의 사원 이름 가져오기
+                var employeeId = $(this).closest("tr").find("td:eq(1)").text(); // 해당 행의 사원 ID 가져오기
+                openEvaluationModal(employeeName, employeeId); // 모달 열기 함수 호출
+            });
+        });
+        // 모달 열기 함수
+        function openEvaluationModal(employeeName, employeeId) {
+            // 평가할 사원의 이름과 ID를 모달에 설정
+            $("#employeeName").text(employeeName);
+            // 여기에서 다른 필요한 정보도 모달에 설정할 수 있습니다.
+            // 모달을 열기
+            $("#evaluationModal").modal("show");
+        }
+        // 모달을 닫습니다.
+        $("#myModal").modal("hide");
+    }
+
+    // '선택 추가' 버튼 클릭 시 선택된 사원을 테이블에 추가합니다.
+    $("#addSelected").click(function(){
+        addSelectedEmployees();
+    });
+
+    // 필터로 걸러진 사원만 전체 선택
+    $('#selectAll').change(function() {
+        var isChecked = $(this).prop('checked');
+        $('#employeeList tr:visible input[type="checkbox"]').prop('checked', isChecked);
+    });
+    
+    // removeSelectedSawon 버튼 클릭 시 선택된 사원 삭제
+    $("#removeSelectedSawon").click(function(){
+        $("#myTable_sawon input[type='checkbox']:checked").each(function(){
+            var row = $(this).closest("tr");
+            var id = row.find("td:eq(1)").text(); // 사번을 기준으로 삭제
+            // 삭제 함수 호출
+            removeAddedEmployee(id);
+            // 행 삭제
+            row.remove();
+        });
+    });
+
+    // 추가된 사원 삭제 함수
+    function removeAddedEmployee(employeeId) {
+        // addedEmployees 배열에서 해당 사원의 인덱스를 찾습니다.
+        var index = addedEmployees.indexOf(employeeId);
+        if (index !== -1) {
+            // 배열에서 해당 인덱스의 요소를 제거합니다.
+            addedEmployees.splice(index, 1);
+        }
+    }
+
+    //////////////////////////////////////////////
+    //select 박스 선택시 미리보기 안보이게
+    $('select').on('mousedown', function() {
+        $(this).siblings('.placeholder').css('display', 'none');
+    });
+
+
+    var addedEmployeeIds = []; // addedEmployeeIds 배열 선언
+
+    // 저장 버튼에 이벤트 처리 함수 연결
+    $("#updateButton").click(function(event) {
+        event.preventDefault();
+        updateDataToServer();
+    });
+
+    // 저장 함수 정의
+    function updateDataToServer() {
+        // 각 입력 필드의 값 확인
+        var pm_code = $('#pm_code').val();
+        var pm_name = $('#pm_name').val();
+        var pm_nori_manager = $('#pm_nori_manager').val();
+        var pm_nori_bu = $('#pm_nori_bu').val();
+        var pm_create_date = $('#pm_create_date').val();
+        var pm_manager = $('#pm_manager').val();
+        var pm_bu = $('#pm_bu').val();
+        var pm_business = $('#pm_business').val();
+        var pm_price = $('#pm_price').val();
+        var pm_workload = $('#pm_workload').val();
+        var pm_full = $('#pm_full').val();
+        var pm_part = $('#pm_part').val();
+        var pm_suggest_date = $('#pm_suggest_date').val();
+        var pm_start_date = $('#pm_start_date').val();
+        var pm_end_date = $('#pm_end_date').val();
+        var pm_work_date = $('#pm_work_date').val();
+        var pm_status = $('#pm_status option:selected').val();
+        var pm_outline = $('#pm_outline').val();
+        var pm_bego = $('#pm_bego').val();
+        var pm_confirmed = $('#pm_confirmed option:selected').val();
+
+        // 폼 데이터를 객체로 생성
+        var tabledata = {
+            pm_code: pm_code,
+            pm_name: pm_name,
+            pm_nori_manager: pm_nori_manager,
+            pm_nori_bu: pm_nori_bu,
+            pm_create_date: pm_create_date,
+            pm_manager: pm_manager,
+            pm_bu: pm_bu,
+            pm_business: pm_business,
+            pm_price: pm_price,
+            pm_workload: pm_workload,
+            pm_full: pm_full,
+            pm_part: pm_part,
+            pm_suggest_date: pm_suggest_date,
+            pm_start_date: pm_start_date,
+            pm_end_date: pm_end_date,
+            pm_work_date: pm_work_date,
+            pm_status: pm_status,
+            pm_outline: pm_outline,
+            pm_bego: pm_bego,
+            pm_confirmed: pm_confirmed,
+            emp_num: addedEmployeeIds  // TaskManagementModel의 컬럼명과 같아야함
+        };
+        
+
+        // 콘솔 로그 출력 후 데이터 전송
+        console.log("TableData: ", tabledata);
+
+        // Ajax를 이용하여 서버로 데이터 전송
+        $.ajax({
+            url: '/updateTask',
+            type: 'POST',
+            data: JSON.stringify(tabledata),
+            contentType: 'application/json',
+            success: function(response) {
+                // 성공적으로 저장되었을 때의 동작
+                console.log('데이터가 성공적으로 서버에 전송되었습니다.');
+                window.location.href = '/assign';
+            },
+            error: function(xhr, status, error) {
+                // 에러 발생 시의 동작
+                console.error('데이터 전송 중 오류가 발생했습니다:', error);
+                console.log('XHR:', xhr);
+                console.log('Status:', status);
+                console.log('Error:', error);
+            }
+        });
+    }
 });
-
-$("#employeeList input[type='checkbox']:checked").each(function(){
-var row = $(this).closest("tr");
-var columns = row.find("td");
-var employeeData = [];
-columns.each(function(){
-employeeData.push($(this).text());
-});
-
-var id = employeeData[1]; // 사번을 기준으로 중복 여부 확인
-if (addedEmployeeIds.includes(id)) {
-duplicateDetected = true;
-} else {
-selectedEmployees.push(employeeData);
-}
-});
-
-// 테이블에 선택한 사원들을 추가합니다.
-var table = $("#myTable_sawon");
-$.each(selectedEmployees, function(index, value){
-var newRow = $("<tr>");
-// 첫 번째 셀에만 체크박스 추가
-$("<td>").html("<input type='checkbox' class='employee-checkbox'>").appendTo(newRow);
-$.each(value.slice(1), function(i, val){
-// 나머지 셀 추가
-$("<td>").html(val).appendTo(newRow);
-});
-newRow.appendTo(table);
-addedEmployeeIds.push(value[1]); // 사번을 addedEmployeeIds 배열에 추가
-console.log("addedEmployeeIds = "+addedEmployeeIds)
-});
-
-// 모달을 닫습니다.
-$("#myModal").modal("hide");
-}
-
-// '선택 추가' 버튼 클릭 시 선택된 사원을 테이블에 추가합니다.
-$("#addSelected").click(function(){
-addSelectedEmployees();
-});
-
-// 필터로 걸러진 사원만 전체 선택
-$('#selectAll').change(function() {
-var isChecked = $(this).prop('checked');
-$('#employeeList tr:visible input[type="checkbox"]').prop('checked', isChecked);
-});
-
-// removeSelectedSawon 버튼 클릭 시 선택된 사원 삭제
-$("#removeSelectedSawon").click(function(){
-$("#myTable_sawon input[type='checkbox']:checked").each(function(){
-var row = $(this).closest("tr");
-var id = row.find("td:eq(1)").text(); // 사번을 기준으로 삭제
-// 삭제 함수 호출
-removeAddedEmployee(id);
-// 행 삭제
-row.remove();
-});
-});
-
-// 추가된 사원 삭제 함수
-function removeAddedEmployee(employeeId) {
-// addedEmployees 배열에서 해당 사원의 인덱스를 찾습니다.
-var index = addedEmployees.indexOf(employeeId);
-if (index !== -1) {
-// 배열에서 해당 인덱스의 요소를 제거합니다.
-addedEmployees.splice(index, 1);
-}
-}
-
-
-// select 박스 선택시 미리보기 안보이게
-$('select').on('mousedown', function() {
-$(this).siblings('.placeholder').css('display', 'none');
-});
-
-// 저장 버튼에 이벤트 처리 함수 연결
-$("#saveButton").click(function(event) {
-event.preventDefault();
-saveDataToServer();
-});
-
-// 저장 함수 정의
-function saveDataToServer() {
-// FormData 생성
-var formData = new FormData();
-
-// 과제 정보 수집
-formData.append('pm_code', $('#pm_code').val());
-formData.append('pm_name', $('#pm_name').val());
-formData.append('pm_nori_manager', $('#pm_nori_manager').val());
-formData.append('pm_nori_bu', $('#pm_nori_bu').val());
-formData.append('pm_create_date', $('#pm_create_date').val());
-formData.append('pm_manager', $('#pm_manager').val());
-formData.append('pm_bu', $('#pm_bu').val());
-formData.append('pm_business', $('#pm_business').val());
-formData.append('pm_price', $('#pm_price').val());
-formData.append('pm_workload', $('#pm_workload').val());
-formData.append('pm_full', $('#pm_full').val());
-formData.append('pm_part', $('#pm_part').val());
-formData.append('pm_suggest_date', $('#pm_suggest_date').val());
-formData.append('pm_start_date', $('#pm_start_date').val());
-formData.append('pm_end_date', $('#pm_end_date').val());
-formData.append('pm_work_date', $('#pm_work_date').val());
-formData.append('pm_status', $('#pm_status').val());
-formData.append('pm_outline', $('#pm_outline').val());
-formData.append('pm_bego', $('#pm_bego').val());
-formData.append('comment', $('#comment').val());
-
-// 투입인력 정보 수집
-// 추가한 사원들의 사번을 formData에 추가
-console.log("add 시 addedEmployeeIds : "+addedEmployeeIds)
-addedEmployeeIds.forEach(function(employeeId) {
-formData.append('addedEmployeeIds', employeeId);
-});
-
-// 파일 업로드 처리
-var fileInputs = document.getElementById('pm_file').files;
-if (fileInputs.length > 0) {
-for (var i = 0; i < fileInputs.length; i++) {
-formData.append('pm_file', fileInputs[i]);
-}
-}
-
-// Ajax를 이용하여 서버로 데이터 전송
-$.ajax({
-url: '/updateTask', // 수정된 부분
-type: 'POST',
-data: formData,
-processData: false,
-contentType: false,
-success: function(response) {
-// 성공적으로 저장되었을 때의 동작
-console.log('데이터가 성공적으로 서버에 전송되었습니다.');
-},
-error: function(xhr, status, error) {
-// 에러 발생 시의 동작
-console.error('데이터 전송 중 오류가 발생했습니다:', error);
-}
-});
-}
-
-});
-
 </script>
 </head>
 <body>
 <!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
-<nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
-    <div class="container-fluid">
-      <div class="navbar-header">
-      <a class="navbar-brand" th:href="@{/index}" style="font-weight: bold; color: orange;">norisystem</a>
-      </div>
-      <ul class="nav navbar-nav">
-          <!-- 사원관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                사원관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a th:href="@{/main}"  >사원관리</a></li>
-              </ul>
-          </li>
-          <!-- 사업관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                  사업관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/assign}"  >과제관리</a></li>
-              </ul>
-          </li>
-          <!-- 교육관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                교육관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/#}"  >교육이수</a></li>
-              </ul>
-          </li>
-          <!-- 통계현황 -->
-          <li><a th:href="@{/#}"  >통계현황</a></li>
-          <!-- 기준관리 -->
-          <li><a th:href="@{/code}"  >기준관리</a></li>
-          <!-- test -->
-          <li><a th:href="@{/test}"  >test</a></li>
-      </ul>
-      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
-          <button class="btn btn-link" style="float: right; color: lightskyblue;">
-              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
-          </button>
-      </form>
-    </div>
-  </nav>
-
+<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
 <!-- -------------------------------------main 부분------------------------------------- -->
-
+<div><br><br></div>
 <div class="container" style="padding-top: 50px; padding-bottom: 50px;">
-    <form id="taskForm" th:action="@{/updateTask}" method="post" enctype="multipart/form-data">
+    <form id="updateTaskForm" th:action="@{/updateTask}" method="post" enctype="multipart/form-data">
         <!-- 과제코드/과제명 -->
         <div class="row" style="">
             <!-- 과제코드 -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="input-block">
                     <!-- 자동으로 입력되는 년월일 시분을 표시할 input 필드 -->
-                    <input type="text" name="pm_code" id="pm_code_date" required spellcheck="false" 
+                    <input type="text" name="pm_code" id="pm_code" required spellcheck="false" 
                            th:value="${tasks_id != null and not #lists.isEmpty(tasks_id) ? tasks_id[0].pm_code : ''}"
                            style="background-color: lightgray;" readonly="readonly">
                     <span class="placeholder">과제코드</span>
                 </div><br>
             </div>
             <!-- 과제명 -->
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="input-block">
                     <input type="text" name="pm_name" id="pm_name" required spellcheck="false" 
                     th:value="${tasks_id != null ? tasks_id.get(0).pm_name : ''}">
@@ -663,10 +846,9 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
         <!-- 담당자/부서/과제생성일 -->
         <hr />
         <div class="row" style="padding-top: 15px">      
-            <!-- User -->
             <div class="col-md-1" style="text-align: right; vertical-align: middle;">
                 <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#pm_nori_manager_Modal">
-                    <span class="glyphicon glyphicon-user"></span> User 
+                    <span class="glyphicon glyphicon-user"></span> User
                 </button>
             </div>
             <!-- 모달 -->
@@ -676,20 +858,32 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">사원 선택</h4>
+                            <h4 class="modal-title">과제 담당자 선택</h4>
                         </div>
-                        <div class="modal-body">
-                            <!-- 
-                            <label for="deptFilter_pmmanager">부서 선택:</label>
-                                <select id="deptSelect" class="form-control">
-                                    <option value="">전체</option>
-                                    <option th:each="employees : ${employees}" th:value="${employees.dept_biz}" th:text="${employees.dept_biz}"></option>
-                                </select>
-                            <br>
-                             -->
-                            <input type="text" id="searchInput_pmamanager" class="form-control" placeholder="검색...">
+                                <div class="modal-body">
+                            <!-- 여기에 사업부/부서 선택 select 박스 -->
+                            <div class="form-row">
+                                 <div class="col-md-6">
+                                    <div class="form-group">
+                                        <select id="selectDeptBiz" class="form-control">
+                                            <option value="" style="font-weight: bold;">사업부 전체</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <select id="selectDeptGroup" class="form-control">
+                                            <option value="" style="font-weight: bold;">부서 전체</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <input type="text" id="searchInput_pmamanager" class="form-control" placeholder="검색...">
+                                <br>
+                            </div>
                             <table class="table table-hover">
-                                <thead>
+                                        <thead>
                                     <tr>
                                         <th></th>
                                         <th>사번</th>
@@ -700,7 +894,7 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
                                         <th>휴대전화</th>
                                         <th>이메일</th>
                                     </tr>
-                                </thead>
+                                        </thead>
                                 <tbody id="employeeList_pmmanager">
                                     <!-- 여기에 사원 목록이 들어갈 부분 -->
                                     <tr th:each="employee : ${employees}">
@@ -728,7 +922,7 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
                     <span class="placeholder">담당자</span>
                 </div><br>
             </div>
-            <!-- 부서 -->
+            <!-- 부서  -->
             <div class="col-md-4">
                 <div class="input-block">
                     <input type="text" name="pm_nori_bu" id="pm_nori_bu" spellcheck="false" 
@@ -853,27 +1047,87 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
                 </div>
             </div>
         </div>
-        <!-- 투입예정/확정유무 -->
-        <div class="row" style="">
+<!-- 투입예정/확정유무 -->
+<div class="row" style="">
+    <div class="input-block">
+        <div class="col-md-6 form-group">
+            <select name="pm_status" id="pm_status" class="form-control" required>
+                <option value="상태" disabled selected >상태</option>
+                <option value="제안" th:selected="${tasks_id != null and tasks_id[0].pm_status == '제안'}">제안</option>
+                <option value="실행" th:selected="${tasks_id != null and tasks_id[0].pm_status == '실행'}">실행</option>
+                <option value="완료" th:selected="${tasks_id != null and tasks_id[0].pm_status == '완료'}">완료</option>
+                <option value="대기" th:selected="${tasks_id != null and tasks_id[0].pm_status == '대기'}">대기</option>
+                <option value="취소" th:selected="${tasks_id != null and tasks_id[0].pm_status == '취소'}">취소</option>
+            </select>
+            <span class="placeholder"></span>
+        </div>
+        <div class="col-md-6 form-group">
+            <select name="pm_confirmed" id="pm_confirmed" class="form-control" required>
+                <option value="확정유무" disabled>확정유무</option>
+                <option value="Y" th:selected="${tasks_id != null and tasks_id[0].pm_confirmed == 'Y'}">Y</option>
+                <option value="N" th:selected="${tasks_id != null and tasks_id[0].pm_confirmed == 'N'}">N</option>
+            </select>
+            <span class="placeholder"></span>
+        </div>
+    </div>
+</div>
+        <!-- 개발환경 -->
+        <hr />
+        <!-- 기종/OS/언어 -->
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-3">
                 <div class="input-block">
-                    <div class="col-md-6 form-group">
-                        <select name="pm_status" id="pm_status" class="form-control" required>
-                            <option value="상태" disabled>상태</option>
-                            <option value="투입" {{ pm_status == '투입' ? 'selected' : '' }}>투입</option>
-                            <option value="투입예정" {{ pm_status == '투입예정' ? 'selected' : '' }}>투입예정</option>
-                            <option value="대기" {{ pm_status == '대기' ? 'selected' : '' }}>대기</option>
-                        </select>
-                        <span class="placeholder"></span>
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <select name="pm_outline" id="pm_confirmed" class="form-control" required>
-                            <option value="확정유무" disabled>확정유무</option>  
-                            <option value="Y" {{ pm_outline == 'Y' ? 'selected' : '' }}>Y</option>
-                            <option value="N" {{ pm_outline == 'N' ? 'selected' : '' }}>N</option>
-                        </select>
-                        <span class="placeholder"></span>
-                    </div>
-                </div>
+                    <input type="text" name="dev_model" id="dev_model" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).dev_model : ''}">
+                    <span class="placeholder">기종</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="os" id="os" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).os : ''}">
+                    <span class="placeholder">OS</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="language" id="language" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).language : ''}">
+                    <span class="placeholder">언어</span>
+                </div><br>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+        <!-- DBMS/TOOL/WAS -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="dbms" id="dbms" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).dbms : ''}">
+                    <span class="placeholder">DBMS</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="tool" id="tool" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).tool : ''}">
+                    <span class="placeholder">TOOL</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="WAS" id="WAS" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).WAS : ''}">
+                    <span class="placeholder">WAS</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="other" id="other" required spellcheck="false" 
+                    th:value="${dev != null ? dev.get(0).other : ''}">
+                    <span class="placeholder">기타</span>
+                </div><br>
+            </div>
         </div>
         <!-- 개요 -->
         <hr />
@@ -881,35 +1135,36 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
             <div class="col-md-12">
                 <div class="input-block form-group">
                     <label for="comment" class="placeholder">개요 : </label>
-                    <textarea class="form-control" rows="5" id="pm_outline" 
+                    <textarea class="form-control" rows="5" name="pm_outline" id="pm_outline" 
                     th:text="${tasks_id != null ? tasks_id.get(0).pm_outline : ''}"></textarea>
                 </div><br>
             </div>
         </div>
-        <!-- 투입인력정보 -->
-        <div class="row" style="">
-            <div class="container">
-                <h5 style="font-weight: bold;">투입인력정보</h5>
-                <table class="table table-bordered table-hover" style="text-align: center;">
-                    <thead class="input-block">
-                        <tr>
-                            <th>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
-                                    <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
-                                </div>
-                            </th>
-                            <th>사번</th>
-                            <th>성명</th>
-                            <th>사업부</th>
-                            <th>그룹명</th>
-                            <th>직급</th>
-                            <th>휴대전화</th>
-                            <th>이메일</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myTable_sawon">
-                        <!-- 테이블 행 추가되는 부분 -->
+<!-- 투입인력정보 -->
+<div class="row">
+    <div class="container">
+        <h5 style="font-weight: bold;">투입인력정보</h5>
+        <table class="table table-bordered table-hover" style="text-align: center;">
+            <thead class="input-block">
+                <tr>
+                    <th>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
+                            <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
+                        </div>
+                    </th>
+                    <th style="vertical-align: middle;">사번</th>
+                    <th style="vertical-align: middle;">성명</th>
+                    <th style="vertical-align: middle;">사업부</th>
+                    <th style="vertical-align: middle;">그룹명</th>
+                    <th style="vertical-align: middle;">직급</th>
+                    <th style="vertical-align: middle;">휴대전화</th>
+                    <th style="vertical-align: middle;">이메일</th>
+                    <th style="vertical-align: middle;">평가</th>
+                </tr>
+            </thead>
+            <tbody id="myTable_sawon">
+                <!-- 테이블 행 추가되는 부분 -->
                 <tr th:each="employee : ${emp}">
                     <td><input type="checkbox" class="employee-checkbox"></td>
                     <td th:text="${employee.emp_num}"></td>
@@ -919,96 +1174,151 @@ console.error('데이터 전송 중 오류가 발생했습니다:', error);
                     <td th:text="${employee.emp_rank}"></td>
                     <td th:text="${employee.phone}"></td>
                     <td th:text="${employee.mail}"></td>
+                    <!-- 평가 값 가져와야함 
+                    <td th:text="${employee.mail}"></td>
+                     -->
                 </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- 모달 -->
-            <div id="myModal" class="modal fade" role="dialog">
-                <div class="modal-dialog modal-lg">
-                    <!-- 모달 내용 -->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">사원 선택</h4>
-                        </div>
-                        <div class="modal-body">
-                            <label for="deptFilter">부서 선택:</label>
-                            <select id="deptFilter" class="form-control">
-                                <option value="">전체</option> <!-- 전체 옵션 추가 -->
-                                <!-- 여기에 각 부서별 옵션을 추가하기 위한 JavaScript 코드가 들어갈 예정 -->
-                            </select>
-                            <br>
-                            <input type="text" id="searchInput" class="form-control" placeholder="검색...">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="selectAll"></th>
-                                        <th>사번</th>
-                                        <th>성명</th>
-                                        <th>사업부</th>
-                                        <th>그룹명</th>
-                                        <th>직급</th>
-                                        <th>휴대전화</th>
-                                        <th>이메일</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="employeeList">
-                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
-                                    <tr th:each="employee : ${employees}">
-                                        <td><input type="checkbox"></td>
-                                        <td th:text="${employee.emp_num}"></td>
-                                        <td th:text="${employee.name_kor}"></td>
-                                        <td th:text="${employee.dept_biz}"></td>
-                                        <td th:text="${employee.dept_group}"></td>
-                                        <td th:text="${employee.emp_rank}"></td>
-                                        <td th:text="${employee.phone}"></td>
-                                        <td th:text="${employee.mail}"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <!-- 페이징 컨트롤 -->
-                            <ul class="pagination" id="pageContent">
-                                <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
-                            </ul>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
-                        </div>
+            </tbody>
+        </table>
+    </div>
+    <!-- 모달 -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- 모달 내용 -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">사원 선택</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-6">
+                        <select id="bizFilter" class="form-control">
+                            <option value="">전체</option>
+                            <option th:each="deptBiz : ${uniqueDeptBiz}" th:value="${deptBiz}" th:text="${deptBiz}"></option>
+                        </select>
                     </div>
+                    <div class="col-md-6">
+                        <select id="deptFilter" class="form-control">
+                            <option value="">전체</option>
+                            <option th:each="deptGroup : ${uniqueDeptGroup}" th:value="${deptGroup}" th:text="${deptGroup}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-12"><br></div>
+                    <div class="col-md-12">
+                        <input type="text" id="searchInput" class="form-control" placeholder="검색...">
+                    </div>
+                    <div class="col-md-12"><br></div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>사번</th>
+                                <th>성명</th>
+                                <th>사업부</th>
+                                <th>그룹명</th>
+                                <th>직급</th>
+                                <th>휴대전화</th>
+                                <th>이메일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeList">
+                            <!-- 모달 사원 테이블 -->
+                            <tr th:each="employee : ${employees}">
+                                <td><input type="checkbox"></td>
+                                <td th:text="${employee.emp_num}"></td>
+                                <td th:text="${employee.name_kor}"></td>
+                                <td th:text="${employee.dept_biz}"></td>
+                                <td th:text="${employee.dept_group}"></td>
+                                <td th:text="${employee.emp_rank}"></td>
+                                <td th:text="${employee.phone}"></td>
+                                <td th:text="${employee.mail}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 페이징 컨트롤 -->
+                    <ul class="pagination" id="pageContent">
+                        <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<!-- 사원 평가를 위한 모달 -->
+<div class="modal fade" id="evaluationModal" tabindex="-1" role="dialog" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="evaluationModalLabel">사원 평가</h4>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <!-- 여기에 평가 폼 등을 추가하세요 -->
+                    <p>평가할 사원: <span id="employeeName"></span></p>
+                    <!-- 평가 폼 등을 추가하세요 -->
+                    <select class="form-control" id="tech_gbn">
+                        <option value="" selected>업무평가</option>
+                        <option value="상">상</option>
+                        <option value="중">중</option>
+                        <option value="하">하</option>
+                    </select>
+                    <textarea class="form-control" rows="5" id="tech_comment" placeholder="기술사항에 대한 평가를 입력해 주세요." style="padding-top: 10px"></textarea>
+<br><br>
+                   <select class="form-control" id="user_gbn">
+                       <option value="" selected>근태평가</option>
+                        <option value="상">상</option>
+                        <option value="중">중</option>
+                        <option value="하">하</option>
+                   </select>
+
+                    <textarea class="form-control" rows="5" id="user_comment" placeholder="인성에 대한 평가를 입력해 주세요." style="padding-top: 10px"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary">평가 제출</button>
+            </div>
+        </div>
+    </div>
+</div>
+
         <!-- 특이사항 -->
         <div class="row" style="padding-top: 15px">
             <div class="col-md-12">
                 <div class="input-block form-group">
                     <label for="comment" class="placeholder">특이사항 : </label>
-                    <textarea class="form-control" rows="5" id="pm_bego"  th:text="${tasks_id != null ? tasks_id.get(0).pm_bego : ''}"></textarea>
+                    <textarea class="form-control" rows="5" id="pm_bego" name="pm_bego" th:text="${tasks_id != null ? tasks_id.get(0).pm_bego : ''}"></textarea>
                 </div><br>
             </div>
         </div>
         <!-- 엑셀첨부 -->
+        <!-- 저장 -->
         <div class="row" style="padding-bottom: 50px; padding-top: 20px; display: flex; justify-content: center;">
-            <a th:href="@{/assign}" style="text-align: center;" class="btn btn-default" th:text="취소"></a>
-            <a th:href="@{/assign}" id="saveButton" style="text-align: center;" class="btn btn-default">저장</a>
+            <a th:href="@{/assign}" style="text-align: center;" class="btn btn-default" th:text="취소"></a>&nbsp;&nbsp;&nbsp;
+            <a th:href="@{/assign}" id="updateButton" style="text-align: center;" class="btn btn-success">저장</a>
         </div>
     </form>
 </div>
+<script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        var selectedOption = document.getElementById('pm_status');
+        console.log('pm_status :', selectedOption.value);
+
+        var selectedOption = document.getElementById('pm_confirmed');
+        console.log('pm_confirmed :', selectedOption.value);
+    });
+</script>
 
 </body>
-
-<div class="content" style="padding-bottom: 0;">
-<footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
-
-    <a class="text-muted">©norisystem Corp.</a><br>
-    <a th:href="@{http://www.norisystem.co.kr/}" target="_blank">Main Home / </a>
-    <a th:href="@{https://gw.norisystem.co.kr/ngw/app/#/}" target="_blank">GroupWare</a>
-    <br>
-
-</footer>
+<!-- footer -->
+<div class="content" style="padding-top: 100px">
+    <div th:replace="footer :: footer"></div>
 </div>
-
-</body>
 </html>

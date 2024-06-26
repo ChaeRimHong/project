@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Modal</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/test.css?after}" />
+    <style>
+        /* 추가된 CSS */
+        .nav-pills {
+            float: left;
+            text-align: center;
+        }
+        .tab-content {
+            margin-left: 120px; /* 탭과 컨텐츠 사이의 간격 조정 */
+        }
+    </style>
+</head>
+<body>
+<!-- 담당자/부서/과제생성일 -->
+<hr />
+<div class="row" style="padding-top: 15px">
+    <div class="col-md-1" style="text-align: right; vertical-align: middle;">
+        <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#pm_nori_manager_Modal">
+            <span class="glyphicon glyphicon-user"></span> User
+        </button>
+    </div>
+    <!-- 모달 -->
+    <div id="pm_nori_manager_Modal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- 모달 내용 -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">사원 선택</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- 검색 필터 -->
+                    <input type="text" id="searchInput_pmamanager" class="form-control" placeholder="검색...">
+                    <br>
+                    <!-- 탭 -->
+                    <ul class="nav nav-pills nav-stacked">
+                        <li class="active"><a data-toggle="tab" href="#deptBizTab">사업부</a></li>
+                        <li><a data-toggle="tab" href="#deptGroupTab">부서</a></li>
+                    </ul>
+                    <!-- 탭 내용 -->
+                    <div class="tab-content">
+                        <div id="deptBizTab" class="tab-pane fade in active">
+                            <!-- 사업부 목록 -->
+                            <div class="form-group">
+                                <ul id="deptBizList" class="list-group">
+                                    <!-- Business unit items will be dynamically added here -->
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="deptGroupTab" class="tab-pane fade">
+                            <!-- 부서 목록 -->
+                            <div class="form-group">
+                                <ul id="deptGroupList" class="list-group">
+                                    <!-- Department items will be dynamically added here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 사원출력 테이블 -->
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>사번</th>
+                                <th>성명</th>
+                                <th>사업부</th>
+                                <th>그룹명</th>
+                                <th>직급</th>
+                                <th>휴대전화</th>
+                                <th>이메일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeList_pmmanager">
+                            <!-- 여기에 사원 목록이 들어갈 부분 -->
+                            <tr th:each="employee : ${employees}">
+                                <td></td>
+                                <td th:text="${employee.emp_num}"></td>
+                                <td th:text="${employee.name_kor}"></td>
+                                <td th:text="${employee.dept_biz}"></td>
+                                <td th:text="${employee.dept_group}"></td>
+                                <td th:text="${employee.emp_rank}"></td>
+                                <td th:text="${employee.phone}"></td>
+                                <td th:text="${employee.mail}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="input-block">
+            <input type="text" name="pm_nori_manager" id="pm_nori_manager" required spellcheck="false" style="background-color: lightgray;" readonly="readonly">
+            <span class="placeholder">담당자</span>
+        </div><br>
+    </div>
+    <div class="col-md-4">
+        <div class="input-block">
+            <input type="text" name="pm_nori_bu" id="pm_nori_bu" required spellcheck="false" style="background-color: lightgray;" readonly="readonly">
+            <span class="placeholder">부서</span>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    var employees_pmmanager = /*[[${employees}]]*/ [];
+    var uniqueDeptBiz = /*[[${uniqueDeptBiz}]]*/ [];
+    var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
+</script>
+
+<script>
+$(document).ready(function(){
+    var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
+
+    console.log("uniqueDeptBiz: ", uniqueDeptBiz);
+    console.log("uniqueDeptGroup: ", uniqueDeptGroup);
+
+    // 사업부와 부서 select 박스 옵션 추가
+    uniqueDeptBiz.forEach(function(dept) {
+        $("#selectDeptBiz").append(new Option(dept, dept));
+    });
+    uniqueDeptGroup.forEach(function(group) {
+        $("#selectDeptGroup").append(new Option(group, group));
+    });
+
+    uniqueDeptBiz.forEach(function(bizUnit) {
+        var listItem = $("<li>").addClass("list-group-item").text(bizUnit);
+        $("#deptBizList").append(listItem);
+    });
+
+    // Dynamic population of department items
+    uniqueDeptGroup.forEach(function(deptGroup) {
+        var listItem = $("<li>").addClass("list-group-item").text(deptGroup);
+        $("#deptGroupList").append(listItem);
+    });
+
+    // 검색 필터
+    $("#searchInput_pmamanager").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#employeeList_pmmanager tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+       
+});
+    });
+
+    // 사업부 및 부서 선택 필터링
+    $("#selectDeptBiz, #selectDeptGroup").on("change", function() {
+        var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
+        var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
+        $("#employeeList_pmmanager tr").each(function() {
+            var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+            var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+            $(this).toggle(bizMatch && groupMatch);
+        });
+    });
+
+    $("#pm_nori_manager_Modal").on("show.bs.modal", function(){
+        // 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
+        $("#employeeList_pmmanager tr").each(function(){
+            var row_pmmanager = $(this);
+
+            row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
+            row_pmmanager.on("click", function(){
+                // 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
+                $("#employeeList_pmmanager tr.selected").removeClass("selected");
+                row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
+
+                // 클릭한 행에서 각 셀의 정보 가져오기
+                var columns_pm = row_pmmanager.find("td");
+                var name_pm = columns_pm.eq(2).text(); // 담당자 이름
+                var dept_pm = columns_pm.eq(3).text(); // 부서
+
+                // 선택된 사원 데이터를 selectedEmployeeData_pmmanager 변수에 저장
+                selectedEmployeeData_pmmanager.name = name_pm; // 담당자 이름 저장
+                selectedEmployeeData_pmmanager.dept = dept_pm; // 부서 저장
+                
+                // 가져온 사원 정보를 입력란에 표시
+                $("#pm_nori_manager").val(selectedEmployeeData_pmmanager.name); // 담당자 이름
+                $("#pm_nori_bu").val(selectedEmployeeData_pmmanager.dept); // 부서
+               
+                // 모달을 닫음
+                $("#pm_nori_manager_Modal").modal("hide");
+            });
+        });
+    });
+
+    // 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
+    $("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
+        $("#employeeList_pmmanager tr.selected").removeClass("selected");
+        // 입력된 데이터 초기화를 하지 않습니다.
+    });
+});
+</script>
+</body>
+</html>
+       

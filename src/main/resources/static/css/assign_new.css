@@ -1,3 +1,12 @@
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col_select {
+    flex: 1;
+    margin-right: 10px; /* 각 select 요소 사이의 간격 조정을 위해 추가 */
+}
     /* 모달 너비를 조정하는 CSS */
     .modal-lg {
       width: 80%; /* 모달 너비를 80%로 조정 */
@@ -109,32 +118,74 @@ div.input-block span.placeholder {
     #pm_nori_bu:focus + span.placeholder, 
     #pm_create_date:valid + span.placeholder,
     #pm_create_date:focus + span.placeholder, 
-    #pm_manager:valid + span.placeholder,
-    #pm_manager:focus + span.placeholder, 
-    #pm_bu:valid + span.placeholder,
-    #pm_bu:focus + span.placeholder,
-    #pm_business:valid + span.placeholder,
-    #pm_business:focus + span.placeholder,
-    #pm_full:valid + span.placeholder,
-    #pm_full:focus + span.placeholder,
-    #pm_part:valid + span.placeholder,
-    #pm_part:focus + span.placeholder,
     #pm_workload:valid + span.placeholder,
     #pm_workload:focus + span.placeholder,
     #pm_price:valid + span.placeholder,
     #pm_price:focus + span.placeholder {
   font:italic;
   transform: scale(1.0) translateX(230px);
-  font-style: italic; /* 입력시 기울기기 글꼴 */
+  font-style: italic; /* ìž…ë ¥ì‹œ ê¸°ìš¸ê¸°ê¸° ê¸€ê¼´ */
+  vertical-align:middle;
+}
+    #pm_bu:valid + span.placeholder,
+    #pm_bu:focus + span.placeholder,
+    #pm_manager:valid + span.placeholder,
+    #pm_manager:focus + span.placeholder, 
+    #pm_part:valid + span.placeholder,
+    #pm_part:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(250px);
+  font-style: italic; /* ìž…ë ¥ì‹œ ê¸°ìš¸ê¸°ê¸° ê¸€ê¼´ */
   vertical-align:middle;
 }
 
-    /* pm_code와 pm_name에 대한 개별 스타일링 */
-    #pm_code_date:not(:placeholder-shown) + span.placeholder,
-    #pm_code_date:focus + span.placeholder, 
+    #pm_full:valid + span.placeholder,
+    #pm_full:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(260px);
+  font-style: italic; /* ìž…ë ¥ì‹œ ê¸°ìš¸ê¸°ê¸° ê¸€ê¼´ */
+  vertical-align:middle;
+    }
+    
+    #pm_business:valid + span.placeholder,
+    #pm_business:focus + span.placeholder {
+  font:italic;
+  transform: scale(1.0) translateX(270px);
+  font-style: italic; /* ìž…ë ¥ì‹œ ê¸°ìš¸ê¸°ê¸° ê¸€ê¼´ */
+  vertical-align:middle;
+}
+
+    #dev_model:valid + span.placeholder,
+    #dev_model:focus + span.placeholder,
+    #os:valid + span.placeholder,
+    #os:focus + span.placeholder,
+    #language:valid + span.placeholder,
+    #language:focus + span.placeholder,
+    #dbms:valid + span.placeholder,
+    #dbms:focus + span.placeholder,
+    #tool:valid + span.placeholder,
+    #tool:focus + span.placeholder,
+    #WAS:valid + span.placeholder,
+    #WAS:focus + span.placeholder,
+    #other:valid + span.placeholder,
+    #other:focus + span.placeholder {
+      font:italic;
+      transform: scale(1.0) translateX(180px);
+      font-style: italic; /* ìž…ë ¥ì‹œ ê¸°ìš¸ê¸°ê¸° ê¸€ê¼´ */
+      vertical-align:middle;
+    }
+
+    /* pm_code에 대한 개별 스타일링 */
+    #pm_code:not(:placeholder-shown) + span.placeholder,
+    #pm_code:focus + span.placeholder{
+      transform: scale(1.0) translateX(260px);
+      font-style: italic; /* 입력시 기울기기 글꼴 */
+    }
+    
+    /* pm_name에 대한 개별 스타일링 */
     #pm_name:not(:placeholder-shown) + span.placeholder,
     #pm_name:focus + span.placeholder {
-      transform: scale(1.0) translateX(440px);
+      transform: scale(1.0) translateX(660px);
       font-style: italic; /* 입력시 기울기기 글꼴 */
     }
     

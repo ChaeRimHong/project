@@ -1,0 +1,61 @@
+/* Styles for the main container */
+.container {
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+/* Styles for the buttons */
+.btn {
+  margin-bottom: 10px;
+}
+
+/* Styles for the search input */
+#searchInput {
+  display: inline-block;
+  width: auto;
+}
+
+/* Styles for the search button */
+#searchButton {
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+/* Styles for the primary button */
+.btn-primary {
+  font-weight: bold;
+}
+
+/* Styles for the table */
+.table {
+  width: 100%;
+}
+
+/* Styles for the table header */
+.table th {
+  text-align: center;
+}
+
+/* Styles for the table body */
+.table tbody {
+  text-align: center;
+}
+
+/* Styles for the table rows */
+.table tbody tr {
+  cursor: pointer;
+}
+
+/* Styles for the table cells */
+.table tbody td {
+  vertical-align: middle;
+}
+
+/* Styles for the selected items in buttons */
+.selected-item {
+  margin-right: 5px;
+  background-color: #f0ad4e;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 3px;
+}

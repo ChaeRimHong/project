@@ -2,8 +2,10 @@ package com.hrm.project.controller;
 
 import javax.sql.DataSource;
 
+import org.h2.engine.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.hrm.project.model.LoginModel;
 import com.hrm.project.repository.LoginRepo;
-import com.hrm.project.service.LoginService;
+import com.hrm.project.repository.SessionRepo;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,13 +24,15 @@ public class MainController {
     private final JdbcTemplate jdbcTemplate;
     private DataSource dataSource;
     private LoginRepo loginRepo;
+    private SessionRepo sessionRepo;
     LoginModel loginModel;
     HttpSession httpSession;
 
     @Autowired
-    public MainController(DataSource dataSource , LoginRepo loginRepo) {
+    public MainController(DataSource dataSource , LoginRepo loginRepo, SessionRepo sessionRepo) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.loginRepo = loginRepo;
+        this.sessionRepo = sessionRepo; //세션 레포 추가 @2024-06-20
     }
     
     @GetMapping("/")
@@ -44,7 +48,7 @@ public class MainController {
         // 로그인 안된 상태면 반환 값 없음
         if (userId == null) {
             // 로그인 페이지로 리다이렉트
-            return "redirect:/login.html";
+            return "redirect:/login";
         }
         try {
             return "index"; // index.html에 대한 Thymeleaf 템플릿 파일명을 반환합니다.
@@ -64,19 +68,20 @@ public class MainController {
     
             if (result != null && result.getPasswd().equals(passwd)) {
                 // login 성공 시 메인 페이지로 리디렉션
-                session.setAttribute("userid", loginModel.getId());
+                session.setAttribute("userid", id);
+                sessionRepo.getSession(id, session); //세션 레포 추가 @2024-06-20
                 System.out.println("로그인 성공");
-                return new ModelAndView("redirect:/main.html");
+                return new ModelAndView("redirect:/main");
             } else {
                 // login 실패 시 다시 로그인 페이지로 이동
                 System.out.println("로그인 실패");
-                return new ModelAndView("redirect:/login.html");
+                return new ModelAndView("redirect:/login");
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
             // 로그인 실패 시 다시 로그인 페이지로 이동
             System.out.println("로그인 실패");
-            return new ModelAndView("redirect:/login.html");
+            return new ModelAndView("redirect:/login");
         }
     }
     
@@ -87,5 +92,42 @@ public class MainController {
         System.out.println("로그아웃 성공");
         return "redirect:/login.html";
     }
+    
+    //임의로 MainController에 만듦, 나중에 전용 controller 생성 후 옮기기 필요
+    @GetMapping("/statistics") 
+    public String statistics_main(HttpSession session, Model model) {
+        // 세션에서 사용자 ID 가져오기
+        String userId = (String) session.getAttribute("userid");
 
+        // 로그인 안된 상태면 로그인 화면으로 리다이렉트
+        if(userId == null){
+            return "redirect:/login.html";
+        }
+
+        try {
+        	return "statistics"; // index.html에 대한 Thymeleaf 템플릿 파일명을 반환합니다.
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    //임의로 MainController에 만듦, 나중에 전용 controller 생성 후 옮기기 필요
+    @GetMapping("/education") // 임의의 값
+    public String education_main(HttpSession session, Model model) {
+    	// 세션에서 사용자 ID 가져오기
+    	String userId = (String) session.getAttribute("userid");
+    	
+    	// 로그인 안된 상태면 로그인 화면으로 리다이렉트
+    	if(userId == null){
+    		return "redirect:/login.html";
+    	}
+    	
+    	try {
+    		return "education"; // index.html에 대한 Thymeleaf 템플릿 파일명을 반환합니다.
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	return null;
+    }
 }

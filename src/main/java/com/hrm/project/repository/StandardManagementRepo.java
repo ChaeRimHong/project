@@ -53,7 +53,7 @@ public class StandardManagementRepo implements StandardManagementRepoI{
                 
                 try (ResultSet resultSet = pstmt.executeQuery()) {
                     while (resultSet.next()) {
-                    	String gbn_code = resultSet.getString("gbn_cd");
+                        String gbn_code = resultSet.getString("gbn_cd");
                         String gbn_detail = resultSet.getString("gbn_detail");
                         String gbn_name = resultSet.getString("gbn_name");
                         String comment = resultSet.getString("comment");
@@ -143,44 +143,4 @@ public class StandardManagementRepo implements StandardManagementRepoI{
             return false;
         }
     }
-
-//    public List<StandardManagementModel> getboard_gro(String gbn_cd) {
-//    	List<StandardManagementModel> getboard_gro = getStandard("bus");
-//
-//        try (Connection conn = common.dbcon()) {
-//            String useDatabaseQuery = "USE pms";
-//            Statement stmt = conn.createStatement();
-//            stmt.execute(useDatabaseQuery);
-//    
-//            String sql = " SELECT md.gbn_detail, md.gbn_name " 
-//            		     + "FROM MASTER_DATA md " 
-//            		     + "JOIN (SELECT gbn_detail, gbn_name FROM MASTER_DATA WHERE gbn_detail LIKE '?0%') sub " 
-//            		     + "ON md.gbn_detail = sub.gbn_detail "
-//            		     + "WHERE md.gbn_cd = 'gro'";
-//            
-//            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//                pstmt.setString(1, gbn_cd);
-//                
-//                try (ResultSet resultSet = pstmt.executeQuery()) {
-//                    while (resultSet.next()) {
-//                        String gbn_detail = resultSet.getString("gbn_detail");
-//                        String gbn_name = resultSet.getString("gbn_name");
-//                        String comment = resultSet.getString("comment");
-//    
-//                        StandardManagementModel standardManagementModel = new StandardManagementModel();
-//                        standardManagementModel.setGbn_detail(gbn_detail);
-//                        standardManagementModel.setGbn_name(gbn_name);
-//                        standardManagementModel.setComment(comment);
-//    
-//                        getboard_gro.add(standardManagementModel);
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            System.out.println("데이터베이스에서 반환된 값이 없음 또는 오류 발생");
-//            e.printStackTrace();
-//        }
-//    
-//        return getboard_gro;
-//    }
 }

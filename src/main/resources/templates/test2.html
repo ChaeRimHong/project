@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>norisystem HRM</title>
   <meta charset="UTF-8">
@@ -7,249 +7,152 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" th:href="@{/css/test.css?after}" />
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
+  <link rel="stylesheet" th:href="@{/css/board.css?after}" />
+  <!-- 
+  <script src="js/test2.js" th:src="@{js/test2.js}"></script>
+   -->
+   <script>
+   function addTableRow(tableID, radioGroupName) {
+	    var table = document.getElementById(tableID);
 
+	    // 테이블이 존재하는지 확인
+	    if (table && table.rows.length > 0 && table.rows[0].cells.length > 0) {
+	        var rowCount = table.rows.length;
+	        var row = table.insertRow(rowCount);
+	    
+	        var cell1 = row.insertCell(0);
+	        var element1 = document.createElement("input");
+	        element1.type = "radio";
+	        element1.name = radioGroupName;
+	        cell1.appendChild(element1);
+	    
+	        // 각 열에 적합한 input 요소를 생성하여 삽입
+	        for (var i = 1; i < table.rows[0].cells.length; i++) {
+	            var cell = row.insertCell(i);
+	            var element = document.createElement("input");
+
+	            // 해당 열의 첫 번째 셀의 input 요소의 type을 확인하여 타입을 설정
+	            var firstCellInputType = table.rows[0].cells[i].querySelector("input").type;
+	            if (firstCellInputType === "date") {
+	                // type이 date인 경우
+	                element.type = "date";
+	            } else {
+	                // 그 외의 경우 (type이 text인 경우 등)
+	                element.type = "text";
+	            }
+
+	            element.className = "form-control";
+	            cell.appendChild(element);
+	        }
+	    } else {
+	        console.error("Table with ID '" + tableID + "' not found or has no rows or cells.");
+	    }
+	}
+   function deleteTableRow(tableID) {
+	    try {
+	        var table = document.getElementById(tableID);
+	        var rowCount = table.rows.length;
+
+	        for (var i = 0; i < rowCount; i++) {
+	            var row = table.rows[i];
+	            var chkbox = row.cells[0].childNodes[0];
+	            if (chkbox.checked) {
+	                table.deleteRow(i);
+	                rowCount--;
+	                i--;
+	            }
+	        }
+	    } catch (e) {
+	        alert(e);
+	    }
+	}
+</script>
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
+<!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
+<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
 <!-- -------------------------------------main 부분------------------------------------- -->
-<div class="container" style="padding-top: 50px; padding-bottom: 50px;" id="wrap">
-    <div class="row" style="text-align: center;">
-    <br>
-        <div class="col-md-4 form-group">
-            <!-- 사업부 -->
-            <button type="button" class="btn btn-default" id="bus" onclick="toggleDiv(event, 'Div_bus')">사업부</button>
-            <div class="dropdown-content table table-hover" id="Div_bus" style="font-size:12px; width: 250px;">
-              <ul class="">
-                <li class="form-control checkbox-label" th:each="bus : ${busstandard}" style="padding-right: 10px; border: 0px">
-                  <input type="checkbox" th:id="${bus.gbn_detail}" th:value="${bus.gbn_detail}" onchange="updateButtonLabel('Div_bus', 'bus')"/>&nbsp;
-                  <label th:for="${bus.gbn_detail}" th:text="${bus.gbn_name}"></label>
-                </li>
-              </ul>
+<div class="container" style="padding-top: 50px; padding-bottom: 50px; width: 1400px;">
+    <form th:action="@{/employee/add}" method="post" enctype="multipart/form-data">
+        <!-- -------------------------------------경력------------------------------------- -->
+		<!-- -------------------------------------스크롤------------------------------------- -->
+        <br><div class="row"></div>
+        <div class="row" style="padding-bottom: 20px;">
+            <hr />
+            <div class="col-md-2 text-right">
+                <span style="font-weight: bold;font-size: large;">경력&nbsp;&nbsp;&nbsp;</span> 
+                <button type="button" class="btn btn-primary btn-sm" onclick="addTableRow('myTable_car', 'tableSelect_car')" 
+                style="font-weight: bold;">+</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteTableRow('myTable_car')"
+                style="font-weight: bold;">−</button>
+            </div>
+            <div class="col-md-10">
+                <table class="table table-bordered table-hover" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>회사</th>
+                            <th>부서</th>
+                            <th>입사일</th>
+                            <th>퇴사일</th>
+                            <th>근속기간</th>
+							<th>최종직급</th>
+							<th>업무내용</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable_car">
+                        <tr>
+                            <td><input type="radio" name="tableSelect_car" value="myTable_car" style="vertical-align: middle;"></td>
+                            <td><input type="text" class="form-control" name="company" id="company"></td>
+                            <td><input type="text" class="form-control" name="department" id="department"></td>
+                            <td><input type="date" class="form-control" name="date_join" id="date_join"></td>
+                            <td><input type="date" class="form-control" name="date_leave" id="date_leave"></td>
+                            <td><input type="text" class="form-control" name="work_period" id="work_period" placeholder="개월"></td>
+							<td><input type="text" class="form-control" name="final_rank" id="final_rank"></td>
+							<td><input type="text" class="form-control" name="work_info" id="work_info"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="col-md-4 form-group">
-            <!-- 부서 -->
-            <button type="button" class="btn btn-default" id="gro" onclick="toggleDiv(event, 'Div_gro')">부서</button>
-            <div class="dropdown-content table table-hover" id="Div_gro" style="font-size:12px; width: 250px;">
-              <ul class="">
-                <li class="form-control checkbox-label" th:each="gro : ${grostandard}" style="padding-right: 10px; border: 0px; display: none;">
-                  <input type="checkbox" th:id="${gro.gbn_detail}" th:value="${gro.gbn_detail}" onchange="updateButtonLabel('Div_gro', 'gro')"/>&nbsp;
-                  <label th:for="${gro.gbn_detail}" th:text="${gro.gbn_name}"></label>
-                </li>
-              </ul>
-            </div>
+        <div class="row" style="padding-bottom: 20px;">
+            <button th:href="@{/main}" id="saveButton" style="text-align: center;" class="btn btn-success">저장</button>
         </div>
-        <div class="col-md-3 form-group">
-            <div class="col-md-8" style="padding-top: 3px;">
-                <input type="text" class="form-control"  id="searchInput" style="display: inline-block; width: auto;" placeholder="이름을 입력하세요">
-            </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-left: 60px">
-                <button class="btn btn-info" id="searchButton" style="font-weight: bold; vertical-align: middle;">검색</button>
-            </div>
-        </div>
-        <div class="col-md-1 form-group" style="padding-top: 3px">
-            <a th:href="@{/board}" class="btn btn-primary" style="font-weight: bold;">신규</a>
-        </div>
-    </div>
-
-<div class="row">
-    <div class="col-md-1"></div>
-    <div class="col-md-10">
-        <div id="show">
-        <table class="table table-hover">
-          <br><br><br>
-          <thead>
-            <tr>
-              <th>사번</th>
-              <th>이름</th>
-              <th>사업부</th>
-              <th>부서명</th>
-              <th>직무</th>
-              <th>직급</th>
-              <th>직책</th>              
-              <th>휴대폰</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody id="employeeTableBody">
-          </tbody>
-        </table>
-        </div>
-    <div class="col-md-1"></div>
-    </div>
+    </form>
 </div>
-</div>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var employees = /*[[${employees}]]*/ [];
-    /*]]>*/
-
-  // 사업부,부서를 클릭했을 때
-    function toggleDiv(event, divId) {
-      var div = document.getElementById(divId);
-      if (div.classList.contains('show')) {
-        div.classList.remove('show');
-      } else {
-        div.classList.add('show');
-      }
-    }
-
-    window.onclick = function(event) {
-      if (!event.target.matches('.btn') && !event.target.matches('input[type="checkbox"]') && !event.target.matches('label')) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        for (var i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains('show')) {
-            openDropdown.classList.remove('show');
-          }
-        }
-      }
-    }
-
- // 사업부를 체크하고 그에 맞는 부서 가져오기
-    function updateButtonLabel(divId, buttonId) {
-      var checkboxes = document.querySelectorAll('#' + divId + ' input[type="checkbox"]');
-      var selected = [];
-      checkboxes.forEach(function(checkbox) {
-        if (checkbox.checked) {
-          selected.push(checkbox.id); // 체크된 체크박스의 ID(gbn_detail 값)를 가져옴
-        }
-      });
-
-      // 콘솔에 선택된 값 출력
-      selected.forEach(function(value, index) {
-        console.log('Index:', index, 'Value:', value);
-      });
-
-      // 콘솔에 선택된 값 출력
-      console.log('Selected values for ' + buttonId + ':', selected+"\n");
-
-      var button = document.getElementById(buttonId);
-      if (selected.length > 0) {
-        button.innerHTML = selected.map(function(item) {
-          // gbn_detail 값을 버튼에 표시할 때 gbn_name으로 변경
-          var gbn_name = document.querySelector('#' + item + ' + label').innerText;
-          return '<span class="selected-item">' + gbn_name + '</span>';
-        }).join('');
-      } else {
-        button.innerText = buttonId === 'bus' ? '사업부' : '부서';
-      }
-
-      // 사업부에 따라 부서 드롭다운 업데이트
-      if (buttonId === 'bus') {
-        var groDropdown = document.getElementById('Div_gro');
-        var busSelected = selected.map(function(item) {
-          return item.charAt(0); // 사업부 코드 (예: 'f', 'i', 's', 't')
-        });
-        var groOptions = groDropdown.querySelectorAll('input[type="checkbox"]');
-        groOptions.forEach(function(option) {
-          var busCode = option.id.charAt(0); // 부서의 사업부 코드
-          if (busSelected.includes(busCode)) {
-            option.parentNode.style.display = 'block'; // 해당 사업부에 속하는 부서 표시
-          } else {
-            option.parentNode.style.display = 'none'; // 해당 사업부에 속하지 않는 부서 숨김
-          }
-        });
-      }
-
-      // 선택된 사업부에 해당하는 데이터를 테이블에 업데이트
-      // updateTable(selected);
-    }
-
-///////////////////////////////////////////사업부///////////////////////////////////////////
-    function updateDepartments() {
-        // 선택된 사업부의 값 배열로 가져오기
-        var checkboxes = document.querySelectorAll("#Div_bus input[type='checkbox']:checked");
-        var selectedBusinessUnits = Array.from(checkboxes).map(function(checkbox) {
-            return checkbox.value;
-        });
-
-        // 선택된 사업부에 해당하는 사원 데이터 가져오기
-        var employees = /*[[${employees}]]*/ [];
-        var filteredEmployees = employees.filter(function(employee) {
-            return selectedBusinessUnits.includes(employee.dept_biz);
-        });
-
-        // 테이블의 tbody 엘리먼트 찾기
-        var tbody = document.getElementById("employeeTableBody");
-
-        // tbody 내용 비우기
-        tbody.innerHTML = "";
-
-        // 사원 데이터를 테이블에 추가하기
-        filteredEmployees.forEach(function(employee) {
-            var tr = document.createElement("tr");
-            tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
-            tbody.appendChild(tr);
-        });
-
-        // 부서 선택 창 업데이트
-        var departmentSelect = document.getElementById("gro");
-        departmentSelect.innerHTML = "<option value='부서' th:placeholder='부서'>부서</option>";
-        var seen = {};
-        filteredEmployees.forEach(function(employee) {
-            if (!seen[employee.dept_group]) {
-                var option = document.createElement("option");
-                option.value = employee.dept_group;
-                option.text = employee.dept_group;
-                departmentSelect.appendChild(option);
-                seen[employee.dept_group] = true;
-            }
-        });
-
-        // 사업부를 선택했을 때 테이블 표시
-        document.getElementById("show").style.display = "block";
-    }
-
-    ///////////////////////////////////////////부서///////////////////////////////////////////
-    function updateEmployees() {
-        // 선택된 부서의 값 가져오기
-        var selectedDepartment = document.getElementById("gro").value;
-
-        // 선택된 사업부의 값 배열로 가져오기
-        var checkboxes = document.querySelectorAll("#Div_bus input[type='checkbox']:checked");
-        var selectedBusinessUnits = Array.from(checkboxes).map(function(checkbox) {
-            return checkbox.value;
-        });
-
-        // 선택된 사업부와 부서에 해당하는 사원 데이터 가져오기
-        var employees = /*[[${employees}]]*/ [];
-        var filteredEmployees = employees.filter(function(employee) {
-            return selectedBusinessUnits.includes(employee.dept_biz) && employee.dept_group === selectedDepartment;
-        });
-
-        // 테이블의 tbody 엘리먼트 찾기
-        var tbody = document.getElementById("employeeTableBody");
-
-        // tbody 내용 비우기
-        tbody.innerHTML = "";
-
-        // 사원 데이터를 테이블에 추가하기
-        filteredEmployees.forEach(function(employee) {
-            var tr = document.createElement("tr");
-            tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
-                           "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>" ;
-            tbody.appendChild(tr);
-        });
-    }
-
-
-</script>
 </body>
-</html>
+<!-- footer -->
+<div class="content" style="padding-top: 100px">
+    <div th:replace="footer :: footer"></div>
+</div>
 
+<script type="text/javascript">
+$(document).ready(function() {
+    // 각 입력 필드에 입력할 때마다 이벤트를 연결합니다.
+    $('#myTable_car tbody').on('input', 'input', function() {
+        showTableData();
+    });
+});
+
+// 입력된 데이터를 콘솔에 출력하는 함수
+function showTableData() {
+    var tableData = [];
+    $('#myTable_car tbody tr').each(function() {
+        var rowData = {
+            company: $(this).find('input:eq(1)').val(),
+            department: $(this).find('input:eq(2)').val(),
+            date_join: $(this).find('input:eq(3)').val(),
+            date_leave: $(this).find('input:eq(4)').val(),
+            work_period: $(this).find('input:eq(5)').val(),
+            final_rank: $(this).find('input:eq(6)').val(),
+            work_info: $(this).find('input:eq(7)').val()
+        };
+        tableData.push(rowData);
+    });
+    console.log("현재 입력된 데이터:", tableData);
+}
+</script>
+
+</html>

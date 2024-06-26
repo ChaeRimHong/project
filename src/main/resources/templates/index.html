@@ -91,6 +91,9 @@
             justify-content: center;
             margin-top: 20px;
         }
+.menu-row a {
+    text-decoration: none;
+}
     </style>
 </head>
 <body>
@@ -103,28 +106,28 @@
 <div class="menu-wrapper">
     <!-- 상위 메뉴 블록 그리드 -->
     <div class="menu-row">
-
-        <a th:href="@{/main}">
+        <a th:href="@{/main}" style="text-decoration: none;">
             <img src="image/hr.png" alt="인사" class="menu-block">
             <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">인사</span>
         </a>
-        <a th:href="@{/assign}">
-            <img src="image/busi1.png" alt="사업관리" class="menu-block"  >
+        <a th:href="@{/assign}" style="text-decoration: none;">
+            <img src="image/busi1.png" alt="사업관리" class="menu-block">
             <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">사업관리</span>
         </a>
     </div>
     <!-- 하위 메뉴 블록 그리드 -->
-    <div class="menu-row">
-        <a th:href="@{/screen4}">
+    <div class="menu-row" style="padding-bottom: 150px;">
+        <a th:href="@{/statistics}" style="text-decoration: none;">
             <img src="image/analysis.png" alt="통계" class="menu-block">
             <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">통계현황</span>
         </a>
-        <a th:href="@{/screen2}">
+        <a th:href="@{/education}" style="text-decoration: none;">
             <img src="image/edu.png" alt="교육" class="menu-block">
             <span style="font-size: 20px;text-align: center; font-weight: bold; vertical-align: middle;">교육</span>
         </a>
     </div>
 </div>
+
             </div>
         </div>
     </div>

@@ -10,73 +10,52 @@
   
   <link rel="stylesheet" th:href="@{/css/assign_new.css?after}" />
   <script type="text/javascript" th:src="@{/js/assign_new.js?after}"></script>
-
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
+  <style>
+    #wrap {
+      min-height: calc(100% - 120px);
+    }
+    html,
+    body {
+      height: 100%;
+      padding: 0px;
+      margin: 0px;
+    }
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    .content {
+      margin-bottom: 50px; /* Footer 높이만큼 여백 추가 */
+      overflow-y: auto; /* 스크롤이 필요할 때만 스크롤바 표시 */
+    }
+  </style>
 </head>
 <body>
 <!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
-<nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
-    <div class="container-fluid">
-      <div class="navbar-header">
-      <a class="navbar-brand" th:href="@{/main}" style="font-weight: bold; color: orange;">norisystem</a>
-      </div>
-      <ul class="nav navbar-nav">
-          <!-- 사원관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                사원관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a th:href="@{/main}"  >사원관리</a></li>
-              </ul>
-          </li>
-          <!-- 사업관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                  사업관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/assign}"  >과제관리</a></li>
-              </ul>
-          </li>
-          <!-- 교육관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                교육관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/#}"  >교육이수</a></li>
-              </ul>
-          </li>
-          <!-- 통계현황 -->
-          <li><a th:href="@{/#}"  >통계현황</a></li>
-          <!-- 기준관리 -->
-          <li><a th:href="@{/code}"  >기준관리</a></li>
-          <!-- test -->
-          <li><a th:href="@{/test}"  >test</a></li>
-      </ul>
-      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
-          <button class="btn btn-link" style="float: right; color: lightskyblue;">
-              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
-          </button>
-      </form>
-    </div>
-  </nav>
+<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
 <!-- -------------------------------------main 부분------------------------------------- -->
-
+<div><br><br></div>
 <div class="container" style="padding-top: 50px; padding-bottom: 50px;">
     <form id="taskForm" th:action="@{/addTask}" method="post" enctype="multipart/form-data">
         <!-- 과제코드/과제명 -->
         <div class="row" style="">
             <!-- 과제코드 -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="input-block">
                     <!-- 자동으로 입력되는 년월일 시분을 표시할 input 필드 -->
-                    <input type="text" name="pm_code" id="pm_code_date" required spellcheck="false"
+                    <input type="text" name="pm_code" id="pm_code" required spellcheck="false"
                     style="background-color: lightgray;" readonly="readonly">
                     <span class="placeholder">과제코드</span>
                 </div><br>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="input-block">
                     <input type="text" name="pm_name" id="pm_name" required spellcheck="false" >
                     <span class="placeholder">과제명</span>
@@ -88,7 +67,7 @@
         <div class="row" style="padding-top: 15px">      
             <div class="col-md-1" style="text-align: right; vertical-align: middle;">
                 <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#pm_nori_manager_Modal">
-                    <span class="glyphicon glyphicon-user"></span> User 
+                    <span class="glyphicon glyphicon-user"></span> User
                 </button>
             </div>
             <!-- 모달 -->
@@ -98,20 +77,30 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">사원 선택</h4>
+                            <h4 class="modal-title">과제 담당자 선택</h4>
                         </div>
-                        <div class="modal-body">
-                            <!-- 
-                            <label for="deptFilter_pmmanager">부서 선택:</label>
-                                <select id="deptSelect" class="form-control">
-                                    <option value="">전체</option>
-                                    <option th:each="employees : ${employees}" th:value="${employees.dept_biz}" th:text="${employees.dept_biz}"></option>
-                                </select>
-                            <br>
-                             -->
+                                <div class="modal-body">
+                            <!-- 여기에 사업부/부서 선택 select 박스 -->
+                            <div class="form-row">
+                                 <div class="col_select">
+                                    <div class="form-group">
+                                        <select id="selectDeptBiz" class="form-control">
+                                            <option value="" style="font-weight: bold;">사업부 전체</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col_select">
+                                    <div class="form-group">
+                                        <select id="selectDeptGroup" class="form-control">
+                                            <option value="" style="font-weight: bold;">부서 전체</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                             <input type="text" id="searchInput_pmamanager" class="form-control" placeholder="검색...">
+                            <br>
                             <table class="table table-hover">
-                                <thead>
+                                        <thead>
                                     <tr>
                                         <th></th>
                                         <th>사번</th>
@@ -122,7 +111,7 @@
                                         <th>휴대전화</th>
                                         <th>이메일</th>
                                     </tr>
-                                </thead>
+                                        </thead>
                                 <tbody id="employeeList_pmmanager">
                                     <!-- 여기에 사원 목록이 들어갈 부분 -->
                                     <tr th:each="employee : ${employees}">
@@ -143,15 +132,13 @@
             </div>
             <div class="col-md-3">
                 <div class="input-block">
-                    <input type="text" name="pm_nori_manager" id="pm_nori_manager" required spellcheck="false" 
-                    style="background-color: lightgray;" readonly="readonly">
-                    <span class="placeholder">담당자</span>
+                    <input type="text" name="pm_nori_manager" id="pm_nori_manager" required spellcheck="false" style="background-color: lightgray;" readonly="readonly">
+                    <span class="placeholder">PL</span>
                 </div><br>
             </div>
             <div class="col-md-4">
                 <div class="input-block">
-                    <input type="text" name="pm_nori_bu" id="pm_nori_bu" required spellcheck="false"
-                    style="background-color: lightgray;" readonly="readonly">
+                    <input type="text" name="pm_nori_bu" id="pm_nori_bu" required spellcheck="false" style="background-color: lightgray;" readonly="readonly">
                     <span class="placeholder">부서</span>
                 </div>
             </div>
@@ -162,13 +149,13 @@
                 </div>
             </div>
         </div>
-        <!-- 책임자/부서/고객사 -->
+        <!-- 고객사/책임자/부서 -->
         <div class="row" style="">
             <div class="col-md-4">
                 <div class="input-block">
-                    <input type="text" name="pm_manager" id="pm_manager" required spellcheck="false" >
-                    <span class="placeholder">책임자(고객)</span>
-                </div><br>
+                    <input type="text" name="pm_business" id="pm_business" required spellcheck="false" >
+                    <span class="placeholder">고객사</span>
+                </div>
             </div>
             <div class="col-md-4">
                 <div class="input-block">
@@ -178,9 +165,9 @@
             </div>
             <div class="col-md-4">
                 <div class="input-block">
-                    <input type="text" name="pm_business" id="pm_business" required spellcheck="false" >
-                    <span class="placeholder">고객사</span>
-                </div>
+                    <input type="text" name="pm_manager" id="pm_manager" required spellcheck="false" >
+                    <span class="placeholder">책임자(고객)</span>
+                </div><br>
             </div>
         </div>
         <!-- 공수/정규(명)/파트너(명) -->
@@ -205,7 +192,7 @@
                 </div><br>
             </div>
         </div>
-                <!-- 계약금액 -->
+        <!-- 계약금액 -->
         <div class="row" style="">
             <div class="col-md-4">
                 <div class="input-block">
@@ -255,18 +242,20 @@
         </div>
         <!-- 투입예정/확정유무 -->
         <div class="row" style="">
-                <div class="input-block">
+                <div class="input-block" style="font-weight: bold;">
                     <div class="col-md-6 form-group">
                         <select name="pm_status" id="pm_status" class="form-control" required>
                             <option value="상태" disabled selected >상태</option>
-                            <option value="투입">투입</option>
-                            <option value="투입예정">투입예정</option>
+                            <option value="제안">제안</option>
+                            <option value="실행">실행</option>
+                            <option value="완료">완료</option>
                             <option value="대기">대기</option>
+                            <option value="취소">취소</option>
                         </select>
                         <span class="placeholder"></span>
                     </div>
                     <div class="col-md-6 form-group">
-                        <select name="pm_outline" id="pm_outline" class="form-control" required>
+                        <select name="pm_confirmed" id="pm_confirmed" class="form-control" required>
                             <option value="확정유무" disabled selected >확정유무</option>  
                             <option value="Y">Y</option>
                             <option value="N">N</option>
@@ -275,107 +264,182 @@
                     </div>
                 </div>
         </div>
+        <!-- 개발환경 -->
+        <hr />
+        
+        <!-- 기종/OS/언어 -->
+        <div class="row" style="padding-top: 15px">
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="dev_model" id="dev_model" required spellcheck="false" >
+                    <span class="placeholder">기종</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="os" id="os" required spellcheck="false" >
+                    <span class="placeholder">OS</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="language" id="language" required spellcheck="false" >
+                    <span class="placeholder">언어</span>
+                </div><br>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+        <!-- DBMS/TOOL/WAS -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="dbms" id="dbms" required spellcheck="false" >
+                    <span class="placeholder">DBMS</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="tool" id="tool" required spellcheck="false" >
+                    <span class="placeholder">TOOL</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="WAS" id="WAS" required spellcheck="false" >
+                    <span class="placeholder">WAS</span>
+                </div><br>
+            </div>
+            <div class="col-md-3">
+                <div class="input-block">
+                    <input type="text" name="other" id="other" required spellcheck="false" >
+                    <span class="placeholder">기타</span>
+                </div><br>
+            </div>
+        </div>
         <!-- 개요 -->
         <hr />
         <div class="row" style="padding-top: 15px">
             <div class="col-md-12">
                 <div class="input-block form-group">
-                    <label for="comment" class="placeholder">개요 : </label>
-                    <textarea class="form-control" rows="5" id="pm_bego"></textarea>
+                    <label for="pm_outline" class="placeholder">개요 : </label>
+                    <textarea class="form-control" rows="5" id="pm_outline"></textarea>
                 </div><br>
             </div>
         </div>
-        <!-- 투입인력정보 -->
-        <div class="row" style="">
-            <div class="container">
-                <h5 style="font-weight: bold;">투입인력정보</h5>
-                <table class="table table-bordered table-hover" style="text-align: center;">
-                    <thead class="input-block">
-                        <tr>
-                            <th>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
-                                    <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
-            
-                                </div>
-                            </th>
-                            <th>사번</th>
-                            <th>성명</th>
-                            <th>사업부</th>
-                            <th>그룹명</th>
-                            <th>직급</th>
-                            <th>휴대전화</th>
-                            <th>이메일</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myTable_sawon">
-                        <!-- 테이블 행 추가되는 부분 -->
-                    </tbody>
-                </table>
-            </div>
-            <!-- 모달 -->
-            <div id="myModal" class="modal fade" role="dialog">
-                <div class="modal-dialog modal-lg">
-                    <!-- 모달 내용 -->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">사원 선택</h4>
+<!-- 투입인력정보 -->
+<hr />
+<div class="row">
+    <div class="container">
+        <h5 style="font-weight: bold;">투입인력정보</h5>
+        <table class="table table-bordered table-hover" style="text-align: center;">
+            <thead class="input-block">
+                <tr>
+                    <th>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="font-weight: bold;">+</button>
+                            <button type="button" class="btn btn-danger" id="removeSelectedSawon" style="font-weight: bold;">-</button>
                         </div>
-                        <div class="modal-body">
-                            <label for="deptFilter">부서 선택:</label>
-                            <select id="deptFilter" class="form-control">
-                                <option value="">전체</option> <!-- 전체 옵션 추가 -->
-                                <!-- 여기에 각 부서별 옵션을 추가하기 위한 JavaScript 코드가 들어갈 예정 -->
-                            </select>
-                            <br>
-                            <input type="text" id="searchInput" class="form-control" placeholder="검색...">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="selectAll"></th>
-                                        <th>사번</th>
-                                        <th>성명</th>
-                                        <th>사업부</th>
-                                        <th>그룹명</th>
-                                        <th>직급</th>
-                                        <th>휴대전화</th>
-                                        <th>이메일</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="employeeList">
-                                    <!-- 여기에 사원 목록이 들어갈 부분 -->
-                                    <tr th:each="employee : ${employees}">
-                                        <td><input type="checkbox"></td>
-                                        <td th:text="${employee.emp_num}"></td>
-                                        <td th:text="${employee.name_kor}"></td>
-                                        <td th:text="${employee.dept_biz}"></td>
-                                        <td th:text="${employee.dept_group}"></td>
-                                        <td th:text="${employee.emp_rank}"></td>
-                                        <td th:text="${employee.phone}"></td>
-                                        <td th:text="${employee.mail}"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <!-- 페이징 컨트롤 -->
-                            <ul class="pagination" id="pageContent">
-                                <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
-                            </ul>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
-                        </div>
+                    </th>
+                    <th style="vertical-align: middle;">사번</th>
+                    <th style="vertical-align: middle;">성명</th>
+                    <th style="vertical-align: middle;">사업부</th>
+                    <th style="vertical-align: middle;">그룹명</th>
+                    <th style="vertical-align: middle;">직급</th>
+                    <th style="vertical-align: middle;">휴대전화</th>
+                    <th style="vertical-align: middle;">이메일</th>
+                    <th style="vertical-align: middle;">평가</th>
+                </tr>
+            </thead>
+            <tbody id="myTable_sawon">
+                <!-- 테이블 행 추가되는 부분 -->
+                <tr th:each="employee : ${emp}">
+                    <td><input type="checkbox" class="employee-checkbox"></td>
+                    <td th:text="${employee.emp_num}"></td>
+                    <td th:text="${employee.name_kor}"></td>
+                    <td th:text="${employee.dept_biz}"></td>
+                    <td th:text="${employee.dept_group}"></td>
+                    <td th:text="${employee.emp_rank}"></td>
+                    <td th:text="${employee.phone}"></td>
+                    <td th:text="${employee.mail}"></td>
+                    <!-- 평가 값 가져와야함 
+                    <td th:text="${employee.mail}"></td>
+                     -->
+            </tbody>
+        </table>
+    </div>
+    <!-- 모달 -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <!-- 모달 내용 -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">사원 선택</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-6">
+                        <select id="bizFilter" class="form-control">
+                            <option value="">전체</option>
+                            <option th:each="deptBiz : ${uniqueDeptBiz}" th:value="${deptBiz}" th:text="${deptBiz}"></option>
+                        </select>
                     </div>
+                    <div class="col-md-6">
+                        <select id="deptFilter" class="form-control">
+                            <option value="">전체</option>
+                            <option th:each="deptGroup : ${uniqueDeptGroup}" th:value="${deptGroup}" th:text="${deptGroup}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-12"><br></div>
+                    <div class="col-md-12">
+                        <input type="text" id="searchInput" class="form-control" placeholder="검색...">
+                    </div>
+                    <div class="col-md-12"><br></div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>사번</th>
+                                <th>성명</th>
+                                <th>사업부</th>
+                                <th>그룹명</th>
+                                <th>직급</th>
+                                <th>휴대전화</th>
+                                <th>이메일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeList">
+                            <!-- 모달 사원 테이블 -->
+                            <tr th:each="employee : ${employees}">
+                                <td><input type="checkbox"></td>
+                                <td th:text="${employee.emp_num}"></td>
+                                <td th:text="${employee.name_kor}"></td>
+                                <td th:text="${employee.dept_biz}"></td>
+                                <td th:text="${employee.dept_group}"></td>
+                                <td th:text="${employee.emp_rank}"></td>
+                                <td th:text="${employee.phone}"></td>
+                                <td th:text="${employee.mail}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- 페이징 컨트롤 -->
+                    <ul class="pagination" id="pageContent">
+                        <!-- 페이징 링크가 여기에 동적으로 추가될 것입니다. -->
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addSelected">선택 추가</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
         <!-- 특이사항 -->
         <div class="row" style="padding-top: 15px">
             <div class="col-md-12">
                 <div class="input-block form-group">
                     <label for="comment" class="placeholder">특이사항 : </label>
-                    <textarea class="form-control" rows="5" id="comment"></textarea>
+                    <textarea class="form-control" rows="5" id="pm_bego"></textarea>
                 </div><br>
             </div>
         </div>
@@ -406,25 +470,29 @@
             </table>
         </div>
         </div>
+        <!-- 저장 -->
         <div class="row" style="padding-bottom: 50px; padding-top: 20px; display: flex; justify-content: center;">
             <a th:href="@{/assign}" style="text-align: center;" class="btn btn-default" th:text="취소"></a>
-            <a th:href="@{/assign}" id="saveButton" style="text-align: center;" class="btn btn-default">저장</a>
+            <a id="saveButton" style="text-align: center;" class="btn btn-default">저장</a>
         </div>
     </form>
 </div>
 
 </body>
 
-<div class="content" style="padding-bottom: 0;">
-<footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
-
-    <a class="text-muted">©norisystem Corp.</a><br>
-    <a th:href="@{http://www.norisystem.co.kr/}" target="_blank">Main Home / </a>
-    <a th:href="@{https://gw.norisystem.co.kr/ngw/app/#/}" target="_blank">GroupWare</a>
-    <br>
-
-</footer>
+<!-- footer -->
+<div class="content" style="padding-top: 100px">
+    <div th:replace="footer :: footer"></div>
 </div>
+<script th:inline="javascript">
+    var employees_pmmanager = /*[[${employees}]]*/ [];
+    var uniqueDeptBiz = /*[[${uniqueDeptBiz}]]*/ [];
+    var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
+
+    var employees_input = /*[[${employees}]]*/ [];
+    var uniqueDeptBiz_input = /*[[${uniqueDeptBiz}]]*/ [];
+    var uniqueDeptGroup_input = /*[[${uniqueDeptGroup}]]*/ [];
+</script>
 
 </body>
 </html>

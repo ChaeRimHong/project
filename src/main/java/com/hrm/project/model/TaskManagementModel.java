@@ -33,6 +33,7 @@ public class TaskManagementModel {
     private String pm_save_name;
     private String pm_file_path;
     private Date pm_save_date;
+    private int[] emp_num;
 
     public Date getPm_save_date() {
         return this.pm_save_date;
@@ -241,10 +242,12 @@ public class TaskManagementModel {
     public void setPm_file_path(String pm_file_path) {
         this.pm_file_path = pm_file_path;
     }
-
-    public void add(TaskManagementModel taskManagementModel) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'add'");
+    
+    public int[] getEmp_num() {
+        return emp_num;
     }
 
+    public void setEmp_num(int[] emp_num) {
+        this.emp_num = emp_num;
+    }
 }

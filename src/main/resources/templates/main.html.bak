@@ -8,9 +8,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="css/main.css" th:href="@{css/main.css}" />
-  <!-- <script type="text/javascript" src="js/main.js" th:src="@{js/main.js}"></script>  -->
-  <script th:src="@{js/main.js}"></script>
-  <script type="text/javascript" src="js/session.js" th:src="@{js/session.js}" defer ></script>
+  <script type="text/javascript" src="js/main.js" th:href="@{js/main.js}"></script>
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" defer ></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
@@ -39,12 +38,10 @@
     }
   </style>
 </head>
-
 <body>
 <!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
-<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
+    <div th:insert="~{navigation :: navbar}"></div>
 <!-- -------------------------------------main 부분------------------------------------- -->
-<div><br><br></div>
 <div class="container" style="padding-top: 50px; padding-bottom: 50px;">
     <!-- 사업부/부서 select // 검색창 // 신규버튼 -->
     <div class="row" style="text-align: center;"><br>
@@ -65,7 +62,7 @@
             </select>
         </div>
         <!-- 검색창 -->
-        <div class="col-md-6">
+        <div class="col-md-6 ">
             <div class="input-group">
                 <input type="text" class="form-control" id="searchInput" placeholder="Search" style="font-weight: bold; margin-left: 40px; height: 34px">
                     <div class="input-group-btn">
@@ -255,8 +252,9 @@
         </div>
     </div>
 </div>
+
 <!-- footer -->
-<div class="content" style="padding-top: 100px">
+<div class="content">
     <div th:replace="footer :: footer"></div>
 </div>
 
@@ -266,8 +264,6 @@ var uniqueDeptBiz = /*[[${uniqueDeptBiz}]]*/ [];
 var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
 
   $(document).ready(function(){
-	  
-    //왼쪽 상단 사업부 select
     var uniqueBusinessUnits = [];
     $("#businessUnit option").each(function(){
       if (this.value && $.inArray(this.value, uniqueBusinessUnits) === -1) {
@@ -278,139 +274,142 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
     for(var i = 0; i < uniqueBusinessUnits.length; i++){
       $("#businessUnit").append("<option value='" + uniqueBusinessUnits[i] + "'>" + uniqueBusinessUnits[i] + "</option>");
     }
-
-    //전체 사원목록 테이블 출력
+    
+    // Call the function to load all employees on page load
     updateAllEmployees();
-
-    //사원 리스트,이력서 다운 모달 열기    
+    
     $("#openDownloadModal").click(function(){
-      $("#downloadFile").modal();
-    });
-
-    //사원리스트 엑셀로 다운
+        // downloadFile 모달 열기
+        $("#downloadFile").modal();
+      });
+    
     $("#emp2list").click(function(){
         // 선택된 emp_num 값들을 배열로 저장할 변수
         var selectedEmpNums = [];
-	
+
         // 모든 체크된 직원들의 emp_num 값을 가져와서 selectedEmpNums 배열에 추가
         $(".employee-checkbox:checked").each(function() {
             var empNum = $(this).closest("tr").find("td:nth-child(2)").text(); // 두 번째 열에 사번이 들어가 있다고 가정하고 가져오는 방식
             selectedEmpNums.push(empNum);
         });
-	
+
         console.log("리스트 다운로드 - 선택된 emp_num 값들:", selectedEmpNums);
         exportSelectedEmployeesToExcel(selectedEmpNums);
     });
 
-	//사원이력서 엑셀로 다운
     $("#emp2resume").click(function(){
         // 선택된 emp_num 값들을 사용하여 이력서 다운로드 기능 수행
         console.log("이력서 다운로드 - 선택된 emp_num 값들:", selectedEmpNums);
         // 여기에 선택된 emp_num 값을 이용한 이력서 다운로드 기능 추가
     });
   });
-  ///////////////////////////////////////////엑셀파일로 다운///////////////////////////////////////////
+
   function exportSelectedEmployeesToExcel(empNums) {
-	var employeesData = [];
+	    var employeesData = [];
 
-	// 선택된 직원들의 정보를 가져와서 employeesData 배열에 저장
-	empNums.forEach(function(empNum) {
-      var empInt = Number(empNum);
-	  // emp_num이랑 empNum의Type을 같게 해야 함
-	  var employee = employeesList.find(e => e.emp_num === empInt);
-	  console.log("employeesList = ",employeesList);
-	  console.log("employee = ",employee);
-	  console.log("empNum = ",empNum);
-	  console.log("empInt = ",empInt);
+	    // 선택된 직원들의 정보를 가져와서 employeesData 배열에 저장
+	    empNums.forEach(function(empNum) {
 
-	  // console.log("Type of empNum:", typeof empNum);
-	  // console.log("Type of e.emp_num:", typeof employeesList[0].emp_num);
-	  // find 메서드 사용 시 조건 로그 추가
-	  // var employee = employeesList.find(e => {
-	  //     console.log("Current emp_num in list:", e.emp_num);
-	  //     console.log("empNum to match:", empNum);
-	  //     return e.emp_num === empNum;
-	  // });
-	  // // employee가 정상적으로 찾아졌는지 확인
-	  // console.log("Found employee:", employee);
+	        var empInt = Number(empNum);
+	      // emp_num이랑 empNum의Type을 같게 해야 함
+	        var employee = employeesList.find(e => e.emp_num === empInt);
+	        console.log("employeesList = ",employeesList);
+	        console.log("employee = ",employee);
+	        console.log("empNum = ",empNum);
+	        console.log("empInt = ",empInt);
 
-	  if (employee) {
-	    employeesData.push({
-	        emp_num: employee.emp_num,
-	        name_kor: employee.name_kor,
-	        dept_biz: employee.dept_biz,
-	        dept_group: employee.dept_group,
-	        position: employee.position,
-	        emp_rank: employee.emp_rank,
-	        work_pos: employee.work_pos,
-	        phone: employee.phone,
-	        mail: employee.mail
+	        // console.log("Type of empNum:", typeof empNum);
+	        // console.log("Type of e.emp_num:", typeof employeesList[0].emp_num);
+
+	        // find 메서드 사용 시 조건 로그 추가
+	        // var employee = employeesList.find(e => {
+	        //     console.log("Current emp_num in list:", e.emp_num);
+	        //     console.log("empNum to match:", empNum);
+	        //     return e.emp_num === empNum;
+	        // });
+
+	        // // employee가 정상적으로 찾아졌는지 확인
+	        // console.log("Found employee:", employee);
+
+	        if (employee) {
+	            employeesData.push({
+	                emp_num: employee.emp_num,
+	                name_kor: employee.name_kor,
+	                dept_biz: employee.dept_biz,
+	                dept_group: employee.dept_group,
+	                position: employee.position,
+	                emp_rank: employee.emp_rank,
+	                work_pos: employee.work_pos,
+	                phone: employee.phone,
+	                mail: employee.mail
+	            });
+	        } else {
+	            console.log("No employee found for emp_num:", empInt);
+	        }
 	    });
-	  } else {
-	      console.log("No employee found for emp_num:", empInt);
-	  }
-	});
 
-	// 테이블 생성
-	var table = document.createElement('table');
-	var thead = document.createElement('thead');
-	var tbody = document.createElement('tbody');
+	    // 테이블 생성
+	    var table = document.createElement('table');
+	    var thead = document.createElement('thead');
+	    var tbody = document.createElement('tbody');
 
-	// 테이블 헤더 추가
-	thead.innerHTML = `
-	    <tr>
-	        <th>사번</th>
-	        <th>이름</th>
-	        <th>사업부</th>
-	        <th>부서명</th>
-	        <th>직무</th>
-	        <th>직급</th>
-	        <th>직책</th>
-	        <th>휴대폰</th>
-	        <th>Email</th>
-	    </tr>
-	`;
-
-	// 테이블 바디에 데이터 추가
-	employeesData.forEach(function(employee) {
-	    var tr = document.createElement('tr');
-	    tr.innerHTML = `
-	        <td>${employee.emp_num}</td>
-	        <td>${employee.name_kor}</td>
-	        <td>${employee.dept_biz}</td>
-	        <td>${employee.dept_group}</td>
-	        <td>${employee.position}</td>
-	        <td>${employee.emp_rank}</td>
-	        <td>${employee.work_pos}</td>
-	        <td>${employee.phone}</td>
-	        <td>${employee.mail}</td>
+	    // 테이블 헤더 추가
+	    thead.innerHTML = `
+	        <tr>
+	            <th>사번</th>
+	            <th>이름</th>
+	            <th>사업부</th>
+	            <th>부서명</th>
+	            <th>직무</th>
+	            <th>직급</th>
+	            <th>직책</th>
+	            <th>휴대폰</th>
+	            <th>Email</th>
+	        </tr>
 	    `;
-	    tbody.appendChild(tr);
-	});
 
-	table.appendChild(thead);
-	table.appendChild(tbody);
+	    // 테이블 바디에 데이터 추가
+	    employeesData.forEach(function(employee) {
+	        var tr = document.createElement('tr');
+	        tr.innerHTML = `
+	            <td>${employee.emp_num}</td>
+	            <td>${employee.name_kor}</td>
+	            <td>${employee.dept_biz}</td>
+	            <td>${employee.dept_group}</td>
+	            <td>${employee.position}</td>
+	            <td>${employee.emp_rank}</td>
+	            <td>${employee.work_pos}</td>
+	            <td>${employee.phone}</td>
+	            <td>${employee.mail}</td>
+	        `;
+	        tbody.appendChild(tr);
+	    });
 
-	// 엑셀 파일로 내보내기
-	var wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
-	var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});
+	    table.appendChild(thead);
+	    table.appendChild(tbody);
 
-	function s2ab(s) {
-	    var buf = new ArrayBuffer(s.length);
-	    var view = new Uint8Array(buf);
-	    for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-	    return buf;
+	    // 엑셀 파일로 내보내기
+	    var wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
+	    var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});
+
+	    function s2ab(s) {
+	        var buf = new ArrayBuffer(s.length);
+	        var view = new Uint8Array(buf);
+	        for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+	        return buf;
+	    }
+
+	    saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), '체크한 사원 리스트.xlsx');
 	}
-	saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), '체크한 사원 리스트.xlsx');
-  }
+
   // Your other functions remain the same...
 
   /*<![CDATA[*/
-  ///////////////////////////////////////////사업부select///////////////////////////////////////////
-  function updateDepartments() {
+///////////////////////////////////////////사업부///////////////////////////////////////////
+function updateDepartments() {
     var selectedBusinessUnit = document.getElementById("businessUnit").value;
     var employees = /*[[${employees}]]*/ [];
-  
+
     var filteredEmployees;
     if (selectedBusinessUnit === '사업부전체') {
         // 사업부를 선택하지 않은 경우, 부서를 선택할 수 없도록 처리
@@ -424,13 +423,12 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
             return employee.dept_biz === selectedBusinessUnit;
         });
     }
-  
+
     var tbody = document.getElementById("employeeTableBody");
     tbody.innerHTML = "";
-  
+
     filteredEmployees.forEach(function(employee) {
         var tr = document.createElement("tr");
-  	  //테이블의 어느 부분을 선택하더라도 모달창이 열리도록 설정
         tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
                        "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
                        "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
@@ -442,7 +440,7 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
                        "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>";
         tbody.appendChild(tr);
     });
-  
+
     var departmentSelect = document.getElementById("department");
     departmentSelect.innerHTML = "<option value='부서' th:placeholder='부서'>부서</option>";
     var seen = {};
@@ -455,21 +453,21 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
             seen[employee.dept_group] = true;
         }
     });
-  
+
     document.getElementById("show").style.display = "block";
-  
+
     // 현재 선택된 사업부를 localStorage에 저장
     localStorage.setItem('selectedBusinessUnit', selectedBusinessUnit);
-  }
+}
 
-  ///////////////////////////////////////////부서select///////////////////////////////////////////
-  function updateEmployees() {
+///////////////////////////////////////////부서///////////////////////////////////////////
+function updateEmployees() {
     var selectedDepartment = document.getElementById("department").value;
     var employees = /*[[${employees}]]*/ [];
-  
+
     // localStorage에서 선택된 사업부 가져오기
     var selectedBusinessUnit = localStorage.getItem('selectedBusinessUnit');
-  
+
     var filteredEmployees;
     if (selectedDepartment === '부서') {
         filteredEmployees = employees.filter(function(employee) {
@@ -480,41 +478,42 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
             return employee.dept_biz === selectedBusinessUnit && employee.dept_group === selectedDepartment;
         });
     }
-  
+
     var tbody = document.getElementById("employeeTableBody");
     tbody.innerHTML = "";
-  
-    filteredEmployees.forEach(function(employee) {
-    var tr = document.createElement("tr");
-    //테이블의 어느 부분을 선택하더라도 모달창이 열리도록 설정
-    tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
-                   "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>";
-    tbody.appendChild(tr);
-    });
-    document.getElementById("show").style.display = "block";
-  }
 
-  /////////////////////////////////////////전체///////////////////////////////////////////
-  //전체 사원 데이터를 가져와 테이블에 표시하는 함수
+    filteredEmployees.forEach(function(employee) {
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_group + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.position + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_rank + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.work_pos + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.phone + "</td>" +
+                       "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.mail + "</td>";
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("show").style.display = "block";
+}
+
+///////////////////////////////////////////전체///////////////////////////////////////////
+  // 전체 사원 데이터를 가져와 테이블에 표시하는 함수
   function updateAllEmployees() {
       // 전체 사원 데이터 가져오기
       var employees = /*[[${employees}]]*/ [];
+
+      // 테이블의 tbody 엘리먼트 찾기
       var tbody = document.getElementById("employeeTableBody");
-  
+
       // tbody 내용 비우기
       tbody.innerHTML = "";
-  
+
       // 사원 데이터를 테이블에 추가하기
       employees.forEach(function(employee) {
           var tr = document.createElement("tr");
-  	      //테이블의 어느 부분을 선택하더라도 모달창이 열리도록 설정
           tr.innerHTML = "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.emp_num + "</td>" +
                          "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.name_kor + "</td>" +
                          "<td class='employee-name' data-empnum='" + employee.emp_num + "'>" + employee.dept_biz + "</td>" +
@@ -527,7 +526,9 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
           tbody.appendChild(tr);
       });
   }
-  ///////////////////////////////////////////검색 버튼 및 엔터키///////////////////////////////////////////
+
+
+///////////////////////////////////////////검색 버튼 및 엔터키///////////////////////////////////////////
   // 검색 버튼 클릭 이벤트
   document.getElementById("searchButton").onclick = search;
   
@@ -539,7 +540,8 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
       search();
     }
   });
-  ///////////////////////////////////////////검색 동작 기능///////////////////////////////////////////
+  
+///////////////////////////////////////////검색 동작 기능///////////////////////////////////////////
   // 검색 기능 함수
   function search() {
     // 검색할 텍스트 가져오기
@@ -572,284 +574,262 @@ var uniqueDeptGroup = /*[[${uniqueDeptGroup}]]*/ [];
       }
     }
   }
-  ///////////////////////////////////////////모달///////////////////////////////////////////
+///////////////////////////////////////////모달///////////////////////////////////////////
   // 사원 이름 클릭 시 모달 열기
-  $(document).on("click", ".employee-name", function () {
+  $(document).on("click", ".employee-name", function() {
     // 클릭된 사원의 사원번호를 가져오기
     var empNum = $(this).attr("data-empnum");
-    console.log("사원모달을 열 empNum:", empNum);
+    console.log("Clicked employee number:", empNum);
 
-    // 클릭된 사원의 정보를 가져오기
-    var employees = /*[[${employees}]]*/ [];
-    var employee = employees.find(
-      (emp) => emp.emp_num === parseInt(empNum, 10)
-    );
-
-    // 직원 정보를 검색하여 클릭된 사원의 정보 찾기
-    if (employee) {
-      $.ajax({
-        url: "/view",
-        type: "POST",
-        data: { empNum: empNum },
-        success: function (base64Image) {
-          // 검사하여 유효하지 않은 이미지 데이터면 기본 이미지로 대체
-          var imgSrc = base64Image
-            ? "data:image/png;base64," + base64Image
-            : "http://localhost:8080/image/default-image.png";
-          loadModalBodyData(employee, imgSrc);
-        },
-        error: function (xhr, status, error) {
-          console.error("이미지 가져오기 실패: " + error);
-          var defaultImgSrc =
-            "http://localhost:8080/image/default-image.png"; // 기본 이미지 경로 설정
-          loadModalBodyData(employee, defaultImgSrc);
-        },
-      });
-    } else {
-      console.error("사원 정보를 찾을 수 없음 - 사원번호:", empNum);
-    }
-  });
-
-  function loadModalBodyData(employee, imgSrc) {
-    // 직원 정보를 바로 모달에 표시
-    var modalBodyHtml = `
-    <div class='row'>
-      <div class='col-md-6' id='modal-left'>
-        <img src='${imgSrc}' alt='Employee Picture' style='max-width: 100%; height: auto;' 
-             onerror="this.onerror=null; this.src='http://localhost:8080/image/default-image.png';">
-      </div>
-      <div class='col-md-6' id='modal-right'>
-        <p><strong>사원번호:</strong><span id='emp_num'> ${employee.emp_num}</span></p>
-        <p><strong>이름:</strong> ${employee.name_kor}</p>
-        <p><strong>영문 이름:</strong> ${employee.name_eng}</p>
-        <p><strong>사업부:</strong> ${employee.dept_biz}</p>
-        <p><strong>부서명:</strong> ${employee.dept_group}</p>
-        <p><strong>직무:</strong> ${employee.position}</p>
-        <p><strong>직급:</strong> ${employee.emp_rank}</p>
-        <p><strong>직책:</strong> ${employee.work_pos}</p>
-        <p><strong>휴대폰:</strong> ${employee.phone}</p>
-        <p><strong>Email:</strong> ${employee.mail}</p>
-        <p><strong>주소:</strong> ${employee.address}</p>
-        <p><strong>도로명 주소:</strong> ${employee.address_num}</p>
-        <p><strong>입사일:</strong> ${employee.date_join}</p>
-        <p><strong>최종 학력:</strong> ${employee.last_edu}</p>
-        <p><strong>병역:</strong> ${employee.military}</p>
-        <p><strong>결혼:</strong> ${employee.marry}</p>
-        <p><strong>신장:</strong> ${employee.height}</p>
-        <p><strong>몸무게:</strong> ${employee.weight}</p>
-        <p><strong>성별:</strong> ${employee.gender}</p>
-        <p><strong>참여 프로젝트:</strong> ${employee.pm_code}</p>
-        <p><strong>구분:</strong> ${employee.input_gbn}</p>
-      </div>
-    </div>`;
-
-    // 모달 바디에 HTML 삽입
-    $(".modal-body").html(modalBodyHtml);
-
-    // 모달 창 너비 조정
-    $("#employeeModal .modal-dialog").addClass("modal-lg");
-
-    // 모달 열기
-    $("#employeeModal").modal("show");
-  }
-
-  $(document).on("click", ".employee-name", function () {
-    // 클릭된 사원의 사원번호를 가져오기
-    var empNum = $(this).attr("data-empnum");
     // 클릭된 사원의 정보를 가져오기
     var employees = /*[[${employees}]]*/ [];
     var employeeFound = false;
 
     // 직원 정보를 검색하여 클릭된 사원의 정보 찾기
     for (var i = 0; i < employees.length; i++) {
-      if (employees[i].emp_num === parseInt(empNum, 10)) {
-		// 사원명 추출
-        var empName = employees[i].name_kor;
-        
-		// 삭제 버튼 클릭 이벤트
-        $("#deleteEmployeeBtn").off("click").on("click", function() {
-          // 삭제하기 전에 확인 대화 상자 표시
-          if (confirm(empName + " (사번: " + empNum + ") 님을 삭제하시겠습니까?")) {
+        if (employees[i].emp_num === parseInt(empNum, 10)) {
+           var empName = employees[i].name_kor; // 사원명 추출
+            // 직원 정보를 바로 모달에 표시
+            var modalBodyHtml = "<div class='row'>" +
+                                    "<div class='col-md-6' id='modal-left'>" +
+                                        "<img src='" + employees[i].pic + "' alt='Employee Picture' style='max-width: 100%; height: auto;'>" +
+                                    "</div>" +
+                                   "<div class='col-md-6' id='modal-right'>" +
+                                  "<p><strong>사원번호:</strong> <span id='emp_num'>" + employees[i].emp_num + "</span></p>" +
+                                  "<p><strong>이름:</strong> " + employees[i].name_kor + "</p>" +
+                                   "<p><strong>영문 이름:</strong> " + employees[i].name_eng + "</p>" +
+                                   "<p><strong>사업부:</strong> " + employees[i].dept_biz + "</p>" +
+                                   "<p><strong>부서명:</strong> " + employees[i].dept_group + "</p>" +
+                                   "<p><strong>직무:</strong> " + employees[i].position + "</p>" +
+                                   "<p><strong>직급:</strong> " + employees[i].emp_rank + "</p>" +
+                                   "<p><strong>직책:</strong> " + employees[i].work_pos + "</p>" +
+                                   "<p><strong>휴대폰:</strong> " + employees[i].phone + "</p>" +
+                                   "<p><strong>Email:</strong> " + employees[i].mail + "</p>" +
+                                   "<p><strong>주소:</strong> " + employees[i].address + "</p>" +
+                                   "<p><strong>도로명 주소:</strong> " + employees[i].address_num + "</p>" +
+                                   "<p><strong>입사일:</strong> " + employees[i].date_join + "</p>" +
+                                   "<p><strong>최종 학력:</strong> " + employees[i].last_edu + "</p>" +
+                                   "<p><strong>병역:</strong> " + employees[i].military + "</p>" +
+                                   "<p><strong>결혼:</strong> " + employees[i].marry + "</p>" +
+                                   "<p><strong>신장:</strong> " + employees[i].height + "</p>" +
+                                   "<p><strong>몸무게&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> " + employees[i].weight + "</p>" +
+                                   "<p><strong>성별&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> " + employees[i].gender + "</p>" +
+                                   "<p><strong>참여 프로젝트:</strong> " + employees[i].pm_code + "</p>" +
+                                   "<p><strong>구분&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</strong> " + employees[i].input_gbn + "</p>" +
+                                   "</div>" +
+                                "</div>";
+                                // 모달 바디에 HTML 삽입
+                                $(".modal-body").html(modalBodyHtml);
+
+                                // 모달 창 너비 조정
+                                $('#employeeModal .modal-dialog').addClass('modal-lg');
+
+                                // 모달 열기
+                                $('#employeeModal').modal('show');
+            employeeFound = true;
+            break;
+        }
+    }
+    if (!employeeFound) {
+        console.error("Employee not found for empNum:", empNum);
+    }
+
+ // 삭제 버튼 클릭 이벤트
+    $("#deleteEmployeeBtn").off("click").on("click", function() {
+        // 삭제하기 전에 확인 대화 상자 표시
+        if (confirm(empName + " (사번: " + empNum + ") 님을 삭제하시겠습니까?")) {
             // 사용자가 확인을 클릭한 경우에만 삭제 함수 실행
             confirmDelete(empNum);
         } else {
-          // 사용자가 취소를 클릭한 경우 아무 작업도 하지 않음
-          console.log("삭제가 취소되었습니다.");
-          // 취소되었다는 알림창 표시
-          alert("삭제가 취소되었습니다.");
-          }
-        });
+            // 사용자가 취소를 클릭한 경우 아무 작업도 하지 않음
+            console.log("삭제가 취소되었습니다.");
+            // 취소되었다는 알림창 표시
+            alert("삭제가 취소되었습니다.");
+        }
+    });
 
-        //수정버튼(사원 모달창)
-        $("#editEmployeeBtn").off("click").on("click", function () {
-          // 모달 창에 표시된 사원 번호를 공백 제거 후 가져옴
-          var empNum = $("#emp_num").text().trim();
-          console.log("Edit button clicked, employee number:", empNum);
-          
-          // 동적으로 폼을 생성
-          var form = $("<form></form>");
-          form.attr("method", "get");
-          form.attr("action", "/getEmpInfo/" + empNum);
-          
-          // 폼을 body에 추가하고 제출
-          $("body").append(form);
-          form.submit();
-        });
 
-        //삭제버튼(사원 모달창)
-        function confirmDelete(empNum) {
-          // 확인창 띄우기
-          var confirmDelete = confirm("삭제하시겠습니까?");
-        
-          // 예를 선택한 경우
-          if (confirmDelete) {
-            // AJAX를 사용하여 백엔드 서버에 삭제 요청 보내기
-            $.ajax({
-              url: "/employees/delete", // 삭제 요청을 처리할 백엔드 API 엔드포인트의 URL
-              type: "POST", // DELETE 메서드로 요청을 보내도록 설정
-              data: { empNum: empNum }, // 삭제할 사원의 emp_num을 데이터로 전송
-              success: function (response) {
+    // 수정 버튼 클릭 이벤트
+    $("#editEmployeeBtn").off("click").on("click", function() {
+        // 모달 창에 표시된 사원 번호를 가져옴
+        var empNum = $("#emp_num").text();
+        console.log("Edit button clicked, employee number:", empNum);
+
+        // Create a form dynamically
+        var form = $('<form></form>');
+        form.attr("method", "get");
+        form.attr("action", "/getEmpInfo/" + empNum);
+
+        // Append the form to the body and submit it
+        $("body").append(form);
+        form.submit();
+    });
+
+// 삭제 확인 함수
+function confirmDelete(empNum) {
+    // 확인창 띄우기
+    var confirmDelete = confirm("삭제하시겠습니까?");
+
+    // 예를 선택한 경우
+    if (confirmDelete) {
+        // AJAX를 사용하여 백엔드 서버에 삭제 요청 보내기
+        $.ajax({
+            url: '/employees/delete', // 삭제 요청을 처리할 백엔드 API 엔드포인트의 URL
+            type: 'POST', // DELETE 메서드로 요청을 보내도록 설정
+            data: { empNum: empNum }, // 삭제할 사원의 emp_num을 데이터로 전송
+            success: function(response) {
                 // 삭제 성공 시, 모달 닫기 등의 추가 작업 수행
                 console.log("사원 삭제 성공");
-                $("#employeeModal").modal("hide"); // 모달 닫기
+                $('#employeeModal').modal('hide'); // 모달 닫기
                 // 추가로 수행할 작업이 있으면 이 곳에 작성
-              },
-              error: function (xhr, status, error) {
+            },
+            error: function(xhr, status, error) {
                 // 삭제 실패 시, 오류 처리 등을 수행
                 console.error("사원 삭제 실패: " + error);
                 // 추가로 수행할 작업이 있으면 이 곳에 작성
-              },
-            });
-          }
-        }
-      }
+            }
+        });
     }
+}
   });
   
   /////////////////////////////////////down 모달//////////////////////////////////////////////
   $(document).ready(function(){
-    console.log("엑셀파일 다운모달");
-    var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
+     console.log("모달 오픈");
+      var selectedEmployeeData_pmmanager = {}; // 선택된 사원 데이터를 저장할 객체
+      console.log("uniqueDeptBiz: ", uniqueDeptBiz);
+      console.log("uniqueDeptGroup: ", uniqueDeptGroup);
 
-    // 사업부와 부서 select 박스 옵션 추가
-    uniqueDeptBiz.forEach(function(dept) {
-      $("#selectDeptBiz").append(new Option(dept, dept));
-    });
-
-    uniqueDeptGroup.forEach(function(group) {
-      $("#selectDeptGroup").append(new Option(group, group));
-    });
-
-    // 검색 필터
-    $("#searchInput_pmamanager").on("keyup", function() {
-      var value = $(this).val().toLowerCase();
-      $("#employeeList_pmmanager tr").filter(function() {
-          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      // 사업부와 부서 select 박스 옵션 추가
+      uniqueDeptBiz.forEach(function(dept) {
+          $("#selectDeptBiz").append(new Option(dept, dept));
       });
-    });
-
-    // 사업부 및 부서 선택 필터링
-    $("#selectDeptBiz, #selectDeptGroup").on("change", function() {
-      var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
-      var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
-      $("#employeeList_pmmanager tr").each(function() {
-        var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
-        var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
-        $(this).toggle(bizMatch && groupMatch);
-      });
-    });
-
-    // #selectDeptBiz 값이 변경될 때 #selectDeptGroup의 선택값 초기화 및 필터링 재적용
-    $("#selectDeptBiz").on("change", function() {
-      $("#selectDeptGroup").val(""); // #selectDeptGroup의 선택값 초기화
-
-      var selectedDeptBiz = $(this).val().toLowerCase();
-      var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
-      $("#employeeList_pmmanager tr").each(function() {
-        var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
-        var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
-        $(this).toggle(bizMatch && groupMatch);
-      });
-    });
-
-    //#selectDeptGroup 값이 변경될 때 필터링 적용
-    $("#selectDeptGroup").on("change", function() {
-      var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
-      var selectedDeptGroup = $(this).val().toLowerCase();
-      $("#employeeList_pmmanager tr").each(function() {
-        var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
-        var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
-        $(this).toggle(bizMatch && groupMatch);
-      });
-    });
-
-    // #selectDeptGroup 값이 변경될 때 사업부에 따라 선택 가능한 부서만 보이도록 설정
-    $("#selectDeptBiz").on("change", function() {
-      var selectedDeptBiz = $(this).val().toLowerCase();
-
-      // 모든 부서 옵션 숨기기
-      $("#selectDeptGroup option").hide();
-
-      // 선택된 사업부에 해당하는 부서 옵션 보이기
-      $("#employeeList_pmmanager tr").each(function() {
-        var deptBiz = $(this).find("td").eq(3).text().toLowerCase();
-        var deptGroup = $(this).find("td").eq(4).text();
-        if (deptBiz === selectedDeptBiz) {
-            $("#selectDeptGroup option[value='" + deptGroup + "']").show();
-        }
-      });
-
-      // 부서 선택 초기화
-      $("#selectDeptGroup").val("");
-    });
-
-    $(document).on("show.bs.modal", "#pm_nori_manager_Modal", function(){
-      // 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
-      $("#employeeList_pmmanager").find("tr").each(function(){
-        var row_pmmanager = $(this);
-        console.log("행 클릭됨");
     
-        row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
-        row_pmmanager.on("click", function(){
-          // 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
+      uniqueDeptGroup.forEach(function(group) {
+          $("#selectDeptGroup").append(new Option(group, group));
+      });
+  
+      // 검색 필터
+      $("#searchInput_pmamanager").on("keyup", function() {
+          var value = $(this).val().toLowerCase();
+          $("#employeeList_pmmanager tr").filter(function() {
+              $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+          });
+      });
+  
+      // 사업부 및 부서 선택 필터링
+      $("#selectDeptBiz, #selectDeptGroup").on("change", function() {
+          var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
+          var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
+          $("#employeeList_pmmanager tr").each(function() {
+              var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+              var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+              $(this).toggle(bizMatch && groupMatch);
+          });
+      });
+  
+      // #selectDeptBiz 값이 변경될 때 #selectDeptGroup의 선택값 초기화 및 필터링 재적용
+      $("#selectDeptBiz").on("change", function() {
+          $("#selectDeptGroup").val(""); // #selectDeptGroup의 선택값 초기화
+      
+          var selectedDeptBiz = $(this).val().toLowerCase();
+          var selectedDeptGroup = $("#selectDeptGroup").val().toLowerCase();
+          $("#employeeList_pmmanager tr").each(function() {
+              var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+              var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+              $(this).toggle(bizMatch && groupMatch);
+          });
+      });
+
+      //#selectDeptGroup 값이 변경될 때 필터링 적용
+      $("#selectDeptGroup").on("change", function() {
+          var selectedDeptBiz = $("#selectDeptBiz").val().toLowerCase();
+          var selectedDeptGroup = $(this).val().toLowerCase();
+          $("#employeeList_pmmanager tr").each(function() {
+              var bizMatch = selectedDeptBiz ? $(this).find("td").eq(3).text().toLowerCase() === selectedDeptBiz : true;
+              var groupMatch = selectedDeptGroup ? $(this).find("td").eq(4).text().toLowerCase() === selectedDeptGroup : true;
+              $(this).toggle(bizMatch && groupMatch);
+          });
+      });
+  
+      // #selectDeptGroup 값이 변경될 때 사업부에 따라 선택 가능한 부서만 보이도록 설정
+      $("#selectDeptBiz").on("change", function() {
+          var selectedDeptBiz = $(this).val().toLowerCase();
+          
+          // 모든 부서 옵션 숨기기
+          $("#selectDeptGroup option").hide();
+      
+          // 선택된 사업부에 해당하는 부서 옵션 보이기
+          $("#employeeList_pmmanager tr").each(function() {
+              var deptBiz = $(this).find("td").eq(3).text().toLowerCase();
+              var deptGroup = $(this).find("td").eq(4).text();
+              if (deptBiz === selectedDeptBiz) {
+                  $("#selectDeptGroup option[value='" + deptGroup + "']").show();
+              }
+          });
+      
+          // 부서 선택 초기화
+          $("#selectDeptGroup").val("");
+      });
+      
+      $(document).on("show.bs.modal", "#pm_nori_manager_Modal", function(){
+          // 사원 목록을 순회하면서 클릭 이벤트를 바인딩합니다.
+          $("#employeeList_pmmanager").find("tr").each(function(){
+              var row_pmmanager = $(this);
+              console.log("행 클릭됨");
+      
+              row_pmmanager.off("click"); // 기존 이벤트 핸들러 제거
+              row_pmmanager.on("click", function(){
+                  // 현재 선택된 행을 강조 표시하기 위해 이전에 선택된 행의 강조 표시를 제거합니다.
+                  $("#employeeList_pmmanager tr.selected").removeClass("selected");
+                  row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
+      
+                  // 클릭한 행에서 각 셀의 정보 가져오기
+                  var columns_pm = row_pmmanager.find("td");
+                  var name_pm = columns_pm.eq(2).text(); // 담당자 이름
+                  var dept_pm = columns_pm.eq(3).text(); // 부서
+                  
+                  console.log("담당자 이름:", name_pm);
+                  console.log("부서:", dept_pm);
+      
+                  // 선택된 사원 데이터를 selectedEmployeeData_pmmanager 변수에 저장
+                  selectedEmployeeData_pmmanager.name = name_pm; // 담당자 이름 저장
+                  selectedEmployeeData_pmmanager.dept = dept_pm; // 부서 저장
+                  
+                  // 가져온 사원 정보를 입력란에 표시
+                  $("#pm_nori_manager").val(selectedEmployeeData_pmmanager.name); // 담당자 이름
+                  $("#pm_nori_bu").val(selectedEmployeeData_pmmanager.dept); // 부서
+      
+                 
+                  // 모달을 닫음
+                  $("#pm_nori_manager_Modal").modal("hide");
+              });
+          });
+      });
+      // 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
+      $("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
           $("#employeeList_pmmanager tr.selected").removeClass("selected");
-          row_pmmanager.addClass("selected"); // 현재 행에 선택 클래스 추가
-    
-          // 클릭한 행에서 각 셀의 정보 가져오기
-          var columns_pm = row_pmmanager.find("td");
-          var name_pm = columns_pm.eq(2).text(); // 담당자 이름
-          var dept_pm = columns_pm.eq(3).text(); // 부서
-
-          // 모달을 닫음
-          $("#pm_nori_manager_Modal").modal("hide");
-        });
+          // 입력된 데이터 초기화를 하지 않습니다.
+          });
       });
-    });
-
-    // 모달이 닫힐 때 선택된 행의 강조 표시를 제거하지만 입력된 데이터는 초기화하지 않습니다.
-    $("#pm_nori_manager_Modal").on("hidden.bs.modal", function(){
-      $("#employeeList_pmmanager tr.selected").removeClass("selected");
-      // 입력된 데이터 초기화를 하지 않습니다.
-      });
-    });
-
+  
   // 전체 선택 및 해제 함수
   function toggleAllEmployees(source) {
-    var checkboxes = document.querySelectorAll('.employee-checkbox');
-    var selectedDeptBiz = document.getElementById("selectDeptBiz").value.toLowerCase();
-    var selectedDeptGroup = document.getElementById("selectDeptGroup").value.toLowerCase();
+      var checkboxes = document.querySelectorAll('.employee-checkbox');
+      var selectedDeptBiz = document.getElementById("selectDeptBiz").value.toLowerCase();
+      var selectedDeptGroup = document.getElementById("selectDeptGroup").value.toLowerCase();
 
-    for (var i = 0; i < checkboxes.length; i++) {
-      var checkbox = checkboxes[i];
-      var employeeDeptBiz = checkbox.parentElement.nextElementSibling.nextElementSibling.nextElementSibling.textContent.toLowerCase();
-      var employeeDeptGroup = checkbox.parentElement.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.textContent.toLowerCase();
+      for (var i = 0; i < checkboxes.length; i++) {
+          var checkbox = checkboxes[i];
+          var employeeDeptBiz = checkbox.parentElement.nextElementSibling.nextElementSibling.nextElementSibling.textContent.toLowerCase();
+          var employeeDeptGroup = checkbox.parentElement.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.textContent.toLowerCase();
 
-      // 현재 선택된 사업부 또는 부서와 일치하는 경우에만 체크박스를 선택합니다.
-      if ((selectedDeptBiz === '' || employeeDeptBiz === selectedDeptBiz) &&
-          (selectedDeptGroup === '' || employeeDeptGroup === selectedDeptGroup)) {
-          checkbox.checked = source.checked;
+          // 현재 선택된 사업부 또는 부서와 일치하는 경우에만 체크박스를 선택합니다.
+          if ((selectedDeptBiz === '' || employeeDeptBiz === selectedDeptBiz) &&
+              (selectedDeptGroup === '' || employeeDeptGroup === selectedDeptGroup)) {
+              checkbox.checked = source.checked;
+          }
       }
-    }
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

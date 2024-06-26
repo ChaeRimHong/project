@@ -9,6 +9,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="css/main.css" th:href="@{css/main.css}" />
   <script src="js/code.js" th:href="@{js/code.js}"></script>
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
   <style>
     #wrap {
       min-height: calc(100% - 120px);
@@ -19,61 +20,32 @@
       padding: 0px;
       margin: 0px;
     }
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    .content {
+      margin-bottom: 50px; /* Footer 높이만큼 여백 추가 */
+      overflow-y: auto; /* 스크롤이 필요할 때만 스크롤바 표시 */
+    }
+    .modal-wide .modal-dialog {
+        width: 320px; /* Adjust as needed */
+    }
   </style>
 </head>
 
 <body>
 <!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
-  <nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
-    <div class="container-fluid">
-      <div class="navbar-header">
-      <a class="navbar-brand" th:href="@{/index}" style="font-weight: bold; color: orange;">norisystem</a>
-      </div>
-      <ul class="nav navbar-nav">
-          <!-- 사원관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                사원관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a th:href="@{/main}"  >사원관리</a></li>
-              </ul>
-          </li>
-          <!-- 사업관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                  사업관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/assign}"  >과제관리</a></li>
-              </ul>
-          </li>
-          <!-- 교육관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                교육관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/#}"  >교육이수</a></li>
-              </ul>
-          </li>
-          <!-- 통계현황 -->
-          <li><a th:href="@{/#}"  >통계현황</a></li>
-          <!-- 기준관리 -->
-          <li><a th:href="@{/code}"  >기준관리</a></li>
-          <!-- test -->
-          <li><a th:href="@{/test}"  >test</a></li>
-      </ul>
-      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
-          <button class="btn btn-link" style="float: right; color: lightskyblue;">
-              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
-          </button>
-      </form>
-    </div>
-  </nav>
+<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
 <!-- -------------------------------------main 부분------------------------------------- -->
-
-<div class="container mt-3" style="padding-top: 50px;"id="wrap">
+<div><br><br></div>
+<div class="container mt-3" style="padding-top: 100px;" id="wrap">
 
   
   <!-- 신규,저장,삭제 버튼 -->
@@ -259,14 +231,8 @@
 </div>
 <div class="col-md-2"></div>
 </body>
-<div class="content" style="margin-bottom :0 ; bottom: 0;  width: 100%; z-index: 1000;">
-  <footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
-  
-      <a class="text-muted">©norisystem Corp.</a><br>
-      <a th:href="@{http://www.norisystem.co.kr/}" target="_blank">Main Home / </a>
-      <a th:href="@{https://gw.norisystem.co.kr/ngw/app/#/}" target="_blank">GroupWare</a>
-      <br>
-  
-  </footer>
-  </div>
+<!-- footer -->
+<div class="content" style="padding-top: 100px">
+    <div th:replace="footer :: footer"></div>
+</div>
   </html>

@@ -3,15 +3,16 @@ package com.hrm.project.model;
 import java.sql.Blob;
 
 public class SessionModel {
-    private Blob pic;
+    private String pic;
     private String name_kor;
     private String authority;
+    private int emp_num;
 
-    public Blob getPic() {
+    public String getPic() {
         return this.pic;
     }
 
-    public void setPic(Blob pic) {
+    public void setPic(String pic) {
         this.pic = pic;
     }
 
@@ -29,6 +30,14 @@ public class SessionModel {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public int getEmp_num() {
+        return this.emp_num;
+    }
+
+    public void setEmp_num(int emp_num) {
+        this.emp_num = emp_num;
     }
 
 }

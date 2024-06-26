@@ -53,10 +53,10 @@ public class LoginRepo implements LoginRepoI{
                 loginModel.setId(login_id);
                 loginModel.setPasswd(login_pass);
 
-                System.out.println("⌈¯ Login ID: " + loginModel.getId());
-                System.out.println("|  Password: " + loginModel.getPasswd());
-                System.out.println("|  Employee Number: " + login_emp);
-                System.out.println("⌊_ Authority: " + login_auth);
+                System.out.println("Login ID: " + loginModel.getId());
+                System.out.println("Password: " + loginModel.getPasswd());
+                System.out.println("Employee Number: " + login_emp);
+                System.out.println("Authority: " + login_auth);
 
                 conn.close();
 

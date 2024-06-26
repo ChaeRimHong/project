@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="navbar">
+  <nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+      <a class="navbar-brand" th:href="@{/index}" style="font-weight: bold; color: orange;">norisystem</a>
+      </div>
+      <ul class="nav navbar-nav">
+          <!-- 사원관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                사원관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a th:href="@{/main}"  >사원관리</a></li>
+              </ul>
+          </li>
+          <!-- 사업관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                  사업관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/assign}"  >과제관리</a></li>
+              </ul>
+          </li>
+          <!-- 교육관리 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                교육관리<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/education}"  >교육이수</a></li>
+              </ul>
+          </li>
+          <!-- 통계현황 -->
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                통계현황<span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                  <li><a th:href="@{/statistics}"  >통계</a></li>
+              </ul>
+          </li>
+          <!-- 기준관리 -->
+          <li><a th:href="@{/code}"  >기준관리</a></li>
+          <!-- test -->
+          <li><a th:href="@{/test}"  >test</a></li>
+          <li><a th:href="@{/test3}"  >test3</a></li>
+          <li><a th:href="@{/test2}"  >test2</a></li>
+      </ul>
+          <!-- 네비게이션 우측 -->
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="#">
+                <img
+                  id="userImage"
+                  alt="User Image"
+                  style="width: 20px; height: 20px; border-radius: 50%"
+                />
+                <span id="userName" style="color: lightskyblue"></span>
+                <span id="userAuthority" style="color: lightskyblue"></span>
+              </a>
+            </li>
+            <li>
+              <a th:href="@{/logout_do}" style="color: lightskyblue">
+                <span class="glyphicon glyphicon-log-in"></span> 로그아웃
+              </a>
+            </li>
+          </ul>
+    </div>
+  </nav>
+
+    </div>
+
+  </body>
+
+</html>

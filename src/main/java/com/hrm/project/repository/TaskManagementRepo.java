@@ -12,12 +12,17 @@ import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
-//import org.apache.poi.ss.usermodel.*;
-//import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.hrm.project.model.Dev_EnvironmentModel;
 import com.hrm.project.model.EmployeeManagementModel;
 import com.hrm.project.model.Pm_histModel;
 import com.hrm.project.model.TaskManagementModel;
 import com.mysql.cj.x.protobuf.MysqlxPrepare.Prepare;
+
+import ch.qos.logback.core.net.SyslogOutputStream;
+
 import java.io.*;
 import java.sql.*;
 import java.util.Iterator;
@@ -37,6 +42,7 @@ import java.sql.Date;
 import java.text.DecimalFormat;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 //import java.util.Date;
 import java.util.List;
 import java.sql.ResultSet;
@@ -48,6 +54,7 @@ public class TaskManagementRepo implements TaskManagementRepoI{
     private DataSource dataSource;
     private TaskManagementRepo taskManagementRepo;
     TaskManagementModel taskManagementModel;
+    EmployeeManagementModel empManagementModel;
     Pm_histModel pm_histModel;
 
     @Autowired
@@ -61,7 +68,7 @@ public class TaskManagementRepo implements TaskManagementRepoI{
 
         try{
             Connection conn = common.dbcon();
-            System.out.println(">  TaskManagementRepo : getTask");
+            System.out.println("과제관리 조회 호출");
             
             //데이터베이스 선택 쿼리
             Statement stmt = conn.createStatement();
@@ -174,7 +181,6 @@ public class TaskManagementRepo implements TaskManagementRepoI{
         }
         return 0;
     }
-
 
     // 과제관리 테이블 검색기능
     public List<TaskManagementModel> searchTasks(String keyword){
@@ -566,7 +572,6 @@ public class TaskManagementRepo implements TaskManagementRepoI{
     public List<TaskManagementModel> getTask_update(TaskManagementModel taskManagementModel, EmployeeManagementModel employeeManagementModel){
         List<TaskManagementModel> tasks = new ArrayList<>();
         List<EmployeeManagementModel> emp = new ArrayList<>();
-        System.out.println(">  TaskManagementRepo : getTask_update return");
         try {
             Connection conn = common.dbcon();
 
@@ -686,12 +691,8 @@ public class TaskManagementRepo implements TaskManagementRepoI{
 
     // 과제 수정 시 정보 업데이트(수정 안된 것도 전부다 업데이트)
     public boolean update_task(TaskManagementModel taskManagementModel) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        System.out.println(">> TaskManagementRepo : update_task return");
-    
         try {
-            conn = common.dbcon();
+            Connection conn = common.dbcon();
             conn.setAutoCommit(false);
     
             String useDatabaseQuery = "USE pms";
@@ -700,8 +701,9 @@ public class TaskManagementRepo implements TaskManagementRepoI{
     
             String sql = "UPDATE PM_DATA SET pm_name=?, pm_nori_manager=?, pm_nori_bu=?, pm_create_date=?, pm_manager=?, pm_bu=?, pm_business=?,"
                        + " pm_price=?, pm_workload=?, pm_full=?, pm_part=?, pm_suggest_date=?, pm_start_date=?, pm_end_date=?, pm_work_date=?, pm_status=?,"
-                       + " pm_outline=?, pm_bego=?, pm_file=?, pm_confirmed=?, pm_file_path=? WHERE pm_code=?";
-            stmt = conn.prepareStatement(sql);
+                       + " pm_outline=?, pm_bego=?, pm_confirmed=? WHERE pm_code=?";
+                       
+            PreparedStatement stmt = conn.prepareStatement(sql);
     
             // 값 설정
             stmt.setString(1, taskManagementModel.getPm_name());
@@ -722,51 +724,143 @@ public class TaskManagementRepo implements TaskManagementRepoI{
             stmt.setString(16, taskManagementModel.getPm_status());
             stmt.setString(17, taskManagementModel.getPm_outline());
             stmt.setString(18, taskManagementModel.getPm_bego());
-            stmt.setString(19, taskManagementModel.getPm_file());
-            stmt.setString(20, taskManagementModel.getPm_confirmed());
-            stmt.setString(21, taskManagementModel.getPm_file_path());
-            stmt.setString(22, taskManagementModel.getPm_code());
+            stmt.setString(19, taskManagementModel.getPm_confirmed());
+            stmt.setString(20, taskManagementModel.getPm_code());
     
-            System.out.println("pm_code : " + taskManagementModel.getPm_code());
-            System.out.println("pm_name : " + taskManagementModel.getPm_name());
+            // 서버에서 데이터를 제대로 받았는지 확인
+            System.out.println("pm_code get: " + taskManagementModel.getPm_code());
+            System.out.println("pm_name: " + taskManagementModel.getPm_name());
+            System.out.println("pm_nori_manager: " + taskManagementModel.getPm_nori_manager());
+            System.out.println("pm_nori_bu: " + taskManagementModel.getPm_nori_bu());
+            System.out.println("pm_create_date: " + taskManagementModel.getPm_create_date());
+            System.out.println("pm_manager: " + taskManagementModel.getPm_manager());
+            System.out.println("pm_bu: " + taskManagementModel.getPm_bu());
+            System.out.println("pm_business: " + taskManagementModel.getPm_business());
+            System.out.println("pm_price: " + taskManagementModel.getPm_price());
+            System.out.println("pm_workload: " + taskManagementModel.getPm_workload());
+            System.out.println("pm_full: " + taskManagementModel.getPm_full());
+            System.out.println("pm_part: " + taskManagementModel.getPm_part());
+            System.out.println("pm_suggest_date: " + taskManagementModel.getPm_suggest_date());
+            System.out.println("pm_start_date: " + taskManagementModel.getPm_start_date());
+            System.out.println("pm_end_date: " + taskManagementModel.getPm_end_date());
+            System.out.println("pm_work_date: " + taskManagementModel.getPm_work_date());
+            System.out.println("pm_status: " + taskManagementModel.getPm_status());
+            System.out.println("pm_outline: " + taskManagementModel.getPm_outline());
+            System.out.println("pm_bego: " + taskManagementModel.getPm_bego());
+            System.out.println("pm_confirmed: " + taskManagementModel.getPm_confirmed());
     
             int rowsAffected = stmt.executeUpdate();
     
             conn.commit();
+    
             return rowsAffected > 0;
         } catch (Exception e) {
+            System.out.println("update task error");
             e.printStackTrace();
+            return false;
+        }
+    }
+    
+    
+    // 과제 인력 투입 저장할 때 main_table에 있는 사원에 대한 pm_code, input_gbn 업데이트
+    public boolean updateEmp_pm_data(String pm_code, int[] emp_nums) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        PreparedStatement useDatabaseStmt = null;
+        
+        System.out.println(">  TaskManagementRepo : updateEmp_pm_data() //과제 신규 생성시 투입인력 정보 업데이트");
+        System.out.println("updateEmp_pm_data pm_code : " + pm_code);
+        System.out.println("updateEmp_pm_data emp_nums : " + Arrays.toString(emp_nums));
+        try {
+            conn = common.dbcon();
+            conn.setAutoCommit(false); // 자동 커밋 모드 비활성화
+
+            // 데이터베이스 선택 쿼리
+            String useDatabaseQuery = "USE pms";
+            useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
+            useDatabaseStmt.execute();
+
+            String sql = "UPDATE MAIN_TABLE SET pm_code=?, input_gbn='Y' where emp_num=?";
+            stmt = conn.prepareStatement(sql);
+            
+            int rowsAffected = 0;
+
+            for (int emp_num : emp_nums) {
+                stmt.setString(1, pm_code);
+                stmt.setInt(2, emp_num);
+                System.out.println("   ㄴ pm_code : " + pm_code);
+                System.out.println("   ㄴ emp_num : " + emp_num);
+    
+                rowsAffected += stmt.executeUpdate();
+            }
+            conn.commit(); // 명시적 커밋
+
+            return rowsAffected > 0;
+        } catch (Exception e) {
             if (conn != null) {
                 try {
-                    conn.rollback();
+                    conn.rollback(); // 예외 발생 시 롤백
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
             }
+            e.printStackTrace();
             return false;
         } finally {
+            if (useDatabaseStmt != null) {
+                try {
+                    useDatabaseStmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true);
+                    conn.setAutoCommit(true); // 자동 커밋 모드 원래 상태로 복구
                     conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
     }
-    
+
+    // 과제에서 인원 철수 시 main_table에 있는 사원에 대한 pm_code, input_gbn 값 삭제
+    public boolean deleteEmp_pm_data(EmployeeManagementModel employeeManagementModel, int emp_num){
+
+        try {
+            Connection conn = common.dbcon();
+
+            // 데이터베이스 선택 쿼리
+            String useDatabaseQuery = "USE pms";
+            PreparedStatement useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
+            useDatabaseStmt.execute();
+
+            String sql = "UPDATE MAIN_TABLE SET pm_code='', input_gbn='' where emp_num=?";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, employeeManagementModel.getEmp_num());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            return rowsAffected > 0;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     // 과제 눌렀을 때 투입 인력 정보 가져오기
     public List<EmployeeManagementModel> getEmpFromPm_hist(String pm_code){
-    	System.out.println(">  TaskManagementRepo : getEmpFromPm_hist() //emp 데이터를 가져옴");
         List<EmployeeManagementModel> employees = new ArrayList<>();
 
         try {
@@ -776,6 +870,8 @@ public class TaskManagementRepo implements TaskManagementRepoI{
             String useDatabaseQuery = "USE pms";
             PreparedStatement useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
             useDatabaseStmt.execute();
+
+            System.out.println("TaskRepo 투입인력정보 가져오는 로직 도는 중");
 
             String sql = "SELECT a.emp_num, a.name_kor, "
             + " (SELECT gbn_name FROM master_data WHERE gbn_detail = a.dept_biz AND gbn_cd = 'bus') AS dept_biz, "
@@ -788,7 +884,7 @@ public class TaskManagementRepo implements TaskManagementRepoI{
             ResultSet resultSet = stmt.executeQuery();
 
             while(resultSet.next()){
-                int emp_num = resultSet.getInt("pm_code");
+                int emp_num = resultSet.getInt("emp_num");
                 String name_kor = resultSet.getString("name_kor");
                 String dept_biz = resultSet.getString("dept_biz");
                 String dept_group = resultSet.getString("dept_group");
@@ -805,16 +901,17 @@ public class TaskManagementRepo implements TaskManagementRepoI{
                 employeeManagementModel.setPhone(phone);
                 employeeManagementModel.setMail(mail);
                 
-                System.out.println("	ㄴ emp_num 값 : "+emp_num);
-                System.out.println("	ㄴ name_kor 값 : "+name_kor);
-                System.out.println("	ㄴ dept_biz 값 : "+dept_biz);
-                System.out.println("	ㄴ dept_group 값 : "+dept_group);
-                System.out.println("	ㄴ work_pos 값 : "+work_pos);
-                System.out.println("	ㄴ phone 값 : "+phone);
-                System.out.println("	ㄴ mail 값 : "+mail);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | emp_num : "+emp_num);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | name_kor : "+name_kor);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | dept_biz : "+dept_biz);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | dept_group : "+dept_group);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | work_pos : "+work_pos);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | phone : "+phone);
+                System.out.println("	ㄴ Repo / getEmpFromPm_hist | mail : "+mail+"\n");
                 
                 employees.add(employeeManagementModel);
             }
+            
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -825,10 +922,15 @@ public class TaskManagementRepo implements TaskManagementRepoI{
 
     // pm_hist 테이블에 투입인력 평가 및 기술 기입하는 메소드
     public boolean update_hist(Pm_histModel pm_histModel){
-        Connection conn = null;
+    	Connection conn = null;
         PreparedStatement stmt = null;
         try {
             conn = common.dbcon();
+            
+            // 데이터베이스 선택 쿼리
+            String useDatabaseQuery = "USE pms";
+            PreparedStatement useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
+            useDatabaseStmt.execute();
             
             String sql = "UPDATE PM_HIST SET tech_gbn = ?, tech_comment = ?, user_gbn = ?, user_comment = ?"
                         + " WHERE pm_code = ?";
@@ -845,6 +947,119 @@ public class TaskManagementRepo implements TaskManagementRepoI{
             return rowsAffected > 0;
         } catch (Exception e) {
             System.out.println("데이터베이스에서 반환된 값이 없음");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 개발환경 테이블에 값 넣는 메소드
+    public boolean insert_DevEnv(TaskManagementModel taskManagementModel, Dev_EnvironmentModel dev_EnvironmentModel){
+        try {
+            Connection conn = common.dbcon();
+
+            // 데이터베이스 선택 쿼리
+            String useDatabaseQuery = "USE pms";
+            PreparedStatement useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
+            useDatabaseStmt.execute();
+
+            String sql = "INSERT INTO dev_environment(pm_code, dev_model, os, language, dbms, tool, WAS, other) "
+                        + " VALUES (?,?,?,?,?,?,?,?)";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, taskManagementModel.getPm_code());
+            stmt.setString(2, dev_EnvironmentModel.getDev_model());
+            stmt.setString(3, dev_EnvironmentModel.getOs());
+            stmt.setString(4, dev_EnvironmentModel.getLanguage());
+            stmt.setString(5, dev_EnvironmentModel.getDbms());
+            stmt.setString(6, dev_EnvironmentModel.getTool());
+            stmt.setString(7, dev_EnvironmentModel.getWAS());
+            stmt.setString(8, dev_EnvironmentModel.getOther());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            System.out.println("insert_DevEnv Error");
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // 개발 환경 테이블 select 메소드
+    public List<Dev_EnvironmentModel> getDevEnv(){
+        List<Dev_EnvironmentModel> envs = new ArrayList<>();
+
+        try {
+            Connection conn = common.dbcon();
+
+            // 데이터베이스 선택 쿼리
+            String useDatabaseQuery = "USE pms";
+            PreparedStatement useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
+            useDatabaseStmt.execute();
+
+            String sql = "SELECT pm_code, dev_model, os, language, dbms, tool, was, other "
+                        + " FROM dev_environment";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet resultSet = stmt.executeQuery();
+
+            while(resultSet.next()){
+                Dev_EnvironmentModel dev = new Dev_EnvironmentModel();
+                dev.setPm_code(resultSet.getString("pm_code"));
+                dev.setDev_model(resultSet.getString("dev_model"));
+                dev.setOs(resultSet.getString("os"));
+                dev.setLanguage(resultSet.getString("language"));
+                dev.setDbms(resultSet.getString("dbms"));
+                dev.setTool(resultSet.getString("tool"));
+                dev.setWAS(resultSet.getString("was"));
+                dev.setOther(resultSet.getString("other"));
+                envs.add(dev);
+
+                System.out.println("getDevEnv pm_code = " + dev.getPm_code());
+                System.out.println("getDevEnv pm_code = " + dev.getDev_model());
+            }
+
+            conn.close();
+        } catch (Exception e) {
+            System.out.println("getDevEnv Error");
+            e.printStackTrace();
+            return null;
+        }
+        return envs;
+    }
+
+    // 개발환경 수정 메소드
+    public boolean update_devenv(TaskManagementModel taskManagementModel, Dev_EnvironmentModel dev_EnvironmentModel){
+        try {
+            Connection conn = common.dbcon();
+            conn.setAutoCommit(false);
+    
+            String useDatabaseQuery = "USE pms";
+            PreparedStatement useDatabaseStmt = conn.prepareStatement(useDatabaseQuery);
+            useDatabaseStmt.execute();
+
+            String sql = "UPDATE dev_environment SET "
+                        + " dev_model = ?, os = ?, language = ?, dbms = ?, tool = ?, WAS = ?, other = ? "
+                        + " WHERE pm_code = ?";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+
+            stmt.setString(1, dev_EnvironmentModel.getDev_model());
+            stmt.setString(2, dev_EnvironmentModel.getOs());
+            stmt.setString(3, dev_EnvironmentModel.getLanguage());
+            stmt.setString(4, dev_EnvironmentModel.getDbms());
+            stmt.setString(5, dev_EnvironmentModel.getTool());
+            stmt.setString(6, dev_EnvironmentModel.getWAS());
+            stmt.setString(7, dev_EnvironmentModel.getOther());
+            stmt.setString(8, taskManagementModel.getPm_code());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            System.out.println("update_devent Error");
             e.printStackTrace();
             return false;
         }

@@ -9,82 +9,48 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" th:href="@{css/assign.css?after}" />
   <script type="text/javascript" th:src="@{js/assign.js?after}"></script>
+  <script type="text/javascript" src="js/session.js" th:href="@{js/session.js}" ></script>
+  <style>
+    #wrap {
+      min-height: calc(100% - 120px);
+    }
+    html,
+    body {
+      height: 100%;
+      padding: 0px;
+      margin: 0px;
+    }
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    .content {
+      margin-bottom: 50px; /* Footer 높이만큼 여백 추가 */
+      overflow-y: auto; /* 스크롤이 필요할 때만 스크롤바 표시 */
+    }
+    .modal-wide .modal-dialog {
+        width: 320px; /* Adjust as needed */
+    }
+  </style>
 </head>
 
 <body>
 <!-- -------------------------------------상단 네비게이션 바------------------------------------- -->
-<nav class="navbar navbar-inverse" style="position: sticky; top: 0;  width: 100%; z-index: 1000;">
-    <div class="container-fluid">
-      <div class="navbar-header">
-      <a class="navbar-brand" th:href="@{/index}" style="font-weight: bold; color: orange;">norisystem</a>
-      </div>
-      <ul class="nav navbar-nav">
-          <!-- 사원관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                사원관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a th:href="@{/main}"  >사원관리</a></li>
-              </ul>
-          </li>
-          <!-- 사업관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                  사업관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/assign}"  >과제관리</a></li>
-              </ul>
-          </li>
-          <!-- 교육관리 -->
-          <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
-                교육관리<span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                  <li><a th:href="@{/#}"  >교육이수</a></li>
-              </ul>
-          </li>
-          <!-- 통계현황 -->
-          <li><a th:href="@{/#}"  >통계현황</a></li>
-          <!-- 기준관리 -->
-          <li><a th:href="@{/code}"  >기준관리</a></li>
-          <!-- test -->
-          <li><a th:href="@{/test}"  >test</a></li>
-      </ul>
-      <form th:action="@{/logout_do}" method="get" style="padding-top: 10px; vertical-align: middle;">
-          <button class="btn btn-link" style="float: right; color: lightskyblue;">
-              <span>로그아웃</span> <span class="glyphicon glyphicon-log-out"></span>
-          </button>
-      </form>
-    </div>
-  </nav>
+<div th:insert="~{navigation :: navbar}" class="navbar navbar-fixed-top"></div>
 <!-- -------------------------------------main 부분------------------------------------- -->
-
-<div class="container mt-3" style="padding-top: 50px; width: auto;">
-  <!-- 신규,저장,삭제 버튼 -->
-    <div class="container" style="text-align: right;">
-        <div class="row" style="float: right; text-align: right;">
-            <div class="col-md-4">
-                <a href="/assign_new" class="btn btn-default">신규</a>
-            </div>
-            <div class="col-md-4">
-                <form class="" action="@{/delete.do}" method="post" style="text-align: right;">
-                    <button type="button" class="btn btn-danger">삭제</button>
-                </form>
-            </div>
-        </div>
-    </div>
-<br>
-
-
+<div><br><br></div>
 <!-- 검색 -->
-<div class="container">
-  <div class="row" th:style="'float: right; text-align: right'">
-      <div class="col-md-6">
+<div class="container" style="padding-top: 50px; width: 50%">
+  <div class="col-md-12" th:style="'float: right; text-align: right'">
+      <div class="col-md-10">
           <form class="search-form" th:action="@{/}" method="get">
-              <div class="input-group" style="width: 500px;">
+              <div class="input-group">
                   <input type="text" class="form-control" placeholder="과제명으로 검색해주세요" name="search">
                   <div class="input-group-btn">
                       <button class="btn btn-default" type="submit">
@@ -94,126 +60,331 @@
               </div>
           </form>
       </div>
-      <div class="col-md-6" th:style="'text-align: right; padding-right: 35px;'">
-          <form class="" th:action="@{/}" method="post" th:style="'float: right; margin-right:0px;'">
-              <button class="btn btn-default" type="submit">
-                  <i class="glyphicon glyphicon-cloud-download"></i>
-              </button>
-          </form>
-          <form class="" th:action="@{/}" method="post" th:style="'float: right;'">
-              <button class="btn btn-default" type="submit">
-                  <i class="glyphicon glyphicon-cloud-upload"></i>
-              </button>
-          </form>
-      </div>
+      <!-- 신규 버튼 -->
+        <div class="col-md-2 form-group" style="padding-right: 60px">
+            <a th:href="@{/assign_new}" class="btn btn-primary" style="font-weight: bold;">신규</a>
+        </div>        
   </div>
 </div>
 
-<div class="container scrollable" style="word-break: break-all; width: 85%">
-    <table class="table table-hover" style="overflow: auto; width: 85%" >
-    <br><br><br>
-        <thead>
-            <tr>
-                <th></th>
-                <th style="width: 40px;">과제코드</th>
-                <th style="width: 40px;">과제명</th>
-                <th>담당자</th>
-                <th>부서</th>
-                <th>과제 생성일</th>
-                <th>책임자</th>
-                <th>부서</th>
-                <th>고객사</th>
-                <th>계약금액</th>
-                <th>계약공수</th>
-                <th>정규(명)</th>
-                <th>파트너(명)</th>
-                <th>제안일</th>
-                <th>시작일</th>
-                <th>완료일</th>
-                <th>기간</th>
-                <th>상태</th>
-                <th>개요</th>
-                <th>특이사항</th>
-                <th>참조파일</th>
-                <th>확정유무</th>
-                <th>등록자ID</th>
-                <th>등록자사번</th>
-                <th>등록자이름</th>
-                <th>경로</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="assign : ${tasks}">
-                <td><input type="checkbox" name="taskIds" th:value="${assign.pm_code}" /></td>
-                <td>
-                    <a th:href="@{'/getTaskInfo/' + ${assign.pm_code}}" th:text="${assign.pm_code}"></a>
-                </td>
-                <td th:text="${assign.pm_name}"></td>
-                <td th:text="${assign.pm_nori_manager}"></td>
-                <td th:text="${assign.pm_nori_bu}"></td>
-                <td th:text="${#dates.format(assign.pm_create_date, 'yyyy-MM-dd')}"></td>
-                <td th:text="${assign.pm_manager}"></td>
-                <td th:text="${assign.pm_bu}"></td>
-                <td th:text="${assign.pm_business}"></td>
-                <td th:text="${assign.pm_price}"></td>
-                <td th:text="${assign.pm_workload}"></td>
-                <td th:text="${assign.pm_full}"></td>
-                <td th:text="${assign.pm_part}"></td>
-                <td th:text="${#dates.format(assign.pm_suggest_date, 'yyyy-MM-dd')}"></td>
-                <td th:text="${#dates.format(assign.pm_start_date, 'yyyy-MM-dd')}"></td>
-                <td th:text="${#dates.format(assign.pm_end_date, 'yyyy-MM-dd')}"></td>
-                <td th:text="${assign.pm_work_date}"></td>
-                <td th:text="${assign.pm_status}"></td>
-                <td th:text="${assign.pm_outline}"></td>
-                <td th:text="${assign.pm_bego}"></td>
-                <td th:text="${assign.pm_file}"></td>
-                <td th:text="${assign.pm_confirmed}"></td>
-                <td th:text="${assign.pm_save_id}"></td>
-                <td th:text="${assign.pm_save_sa}"></td>
-                <td th:text="${assign.pm_save_name}"></td>
-                <td th:text="${assign.pm_file_path}"></td>
-            </tr>
-        </tbody>
-    </table>
+<div class="container" style="width: 90%">    
+<!-- 과제 정보 테이블 -->
+    <div class="col-md-12">
+        <div class="col-md-12">
+            <div id="show">
+                <table class="table table-hover"><br><br><br>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th style="display: none;">과제코드</th>
+                            <th>과제명</th>
+                            <th>담당자</th>
+                            <th>부서</th>
+                            <th style="display: none;">과제 생성일</th>
+                            <th style="display: none;">책임자</th>
+                            <th style="display: none;">부서</th>
+                            <th>고객사</th>
+                            <th style="display: none;">계약금액</th>
+                            <th style="display: none;">계약공수</th>
+                            <th style="display: none;">정규(명)</th>
+                            <th style="display: none;">파트너(명)</th>
+                            <th style="display: none;">제안일</th>
+                            <th>시작일 ~ 완료일</th>
+                            <!-- <th>완료일</th>  -->
+                            <th style="display: none;">기간</th>
+                            <th>상태</th>
+                            <th style="display: none;">개요</th>
+                            <th style="display: none;">특이사항</th>
+                            <th style="display: none;">참조파일</th>
+                            <th style="display: none;">확정유무</th>
+                            <th style="display: none;">등록자ID</th>
+                            <th style="display: none;">등록자사번</th>
+                            <th style="display: none;">등록자이름</th>
+                            <th style="display: none;">경로</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignTableBody">
+                        <!-- Tasks will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+    <!-- Pagination Controls -->
+    <div class="row" style="padding-bottom: 80px; padding-top: 30px">
+        <div class="col-md-12 text-center">
+            <ul class="pagination" id="paginationControls">
+                <!-- Pagination items will be dynamically inserted here -->
+            </ul>
+        </div>
+    </div>
+<!-- 과제 선택시 모달 창 -->
+<div id="assignModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-wide"> <!-- Added custom class here -->
+        <!-- 모달 내용 -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">과제 정보</h4>
+            </div>
+            <div class="modal-body">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab1">기본 정보</a></li>
+                    <li><a data-toggle="tab" href="#tab2">추가 정보</a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <!-- 첫번째 탭 -->
+                    <div id="tab1" class="tab-pane fade in active">
+                        <div class="row" style="padding-top: 20px">
+                            <div class="col-md-6">
+                                <p><strong>과제코드:</strong> <span id="pm_code"></span></p>
+                                <p><strong>과제명:</strong> <span id="pm_name"></span></p>
+                                <p><strong>담당자:</strong> <span id="pm_nori_manager"></span></p>
+                                <p><strong>부서:</strong> <span id="pm_nori_bu"></span></p>
+                                <p><strong>과제 생성일:</strong> <span id="pm_create_date"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>책임자:</strong> <span id="pm_manager"></span></p>
+                                <p><strong>부서:</strong> <span id="pm_bu"></span></p>
+                                <p><strong>고객사:</strong> <span id="pm_business"></span></p>
+                                <p><strong>계약금액:</strong> <span id="pm_price"></span></p>
+                                <p><strong>계약공수:</strong> <span id="pm_workload"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>정규(명):</strong> <span id="pm_full"></span></p>
+                                <p><strong>파트너(명):</strong> <span id="pm_part"></span></p>
+                                <p><strong>제안일:</strong> <span id="pm_suggest_date"></span></p>
+                                <p><strong>시작일:</strong> <span id="pm_start_date"></span></p>
+                                <p><strong>완료일:</strong> <span id="pm_end_date"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>기간:</strong> <span id="pm_work_date"></span></p>
+                                <p><strong>상태:</strong> <span id="pm_status"></span></p>
+                                <p><strong>개요:</strong> <span id="pm_outline"></span></p>
+                                <p><strong>특이사항:</strong> <span id="pm_bego"></span></p>
+                                <p><strong>참조파일:</strong> <span id="pm_file"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>확정유무:</strong> <span id="pm_confirmed"></span></p>
+                                <p><strong>등록자ID:</strong> <span id="modalPmSaveId"></span></p>
+                                <p><strong>등록자사번:</strong> <span id="modalPmSaveSa"></span></p>
+                                <p><strong>등록자이름:</strong> <span id="modalPmSaveName"></span></p>
+                                <p><strong>경로:</strong> <span id="pm_filePath"></span></p>
+                            </div>
+                        </div>
+                    </div>
 
-</div>
-<!-- -------------------------------------페이지------------------------------------- -->
-<div class="container" style="text-align: center; padding-top: 75px; padding-bottom: 75px;">
-    <ul class="pagination">
-        <li>
-            <a th:href="@{/paging_task(page=1)}">
-                <span class="glyphicon glyphicon-step-backward"></span>
-            </a>
-        </li>
-        <li>
-            <a th:href="${currentPage == null || currentPage == 1 ? '#' : '/paging_task?page=' + (currentPage - 1)}">
-                <span class="glyphicon glyphicon-chevron-left"></span>
-            </a>
-        </li>
-        <li th:each="page, iterStat : ${pages}" 
-            th:class="${iterStat.index + 1 == currentPage} ? 'active' : ''">
-            <a th:href="@{/paging_task(page=${page})}" th:text="${page}"></a>
-        </li>
-        <li>
-            <a th:href="${currentPage == null || currentPage == totalPages ? '#' : '/paging_task?page=' + (currentPage + 1)}">
-                <span class="glyphicon glyphicon-chevron-right"></span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/paging_task(page=${totalPages})}">
-                <span class="glyphicon glyphicon-step-forward"></span>
-            </a>
-        </li>
-    </ul>
-</div>
-<div class="content" style="padding-bottom: 0;">
-    <footer class="footer mt-auto py-3 bg-light" style="padding-top: 10px;">
-        <a class="text-muted">©norisystem Corp.</a><br>
-        <a href="http://www.norisystem.co.kr/" target="_blank">Main Home / </a>
-        <a href="https://gw.norisystem.co.kr/ngw/app/#/" target="_blank">GroupWare</a>
-        <br>
-    </footer>
+                    <!-- 두번째 탭 -->
+                    <div id="tab2" class="tab-pane fade">
+                        <div class="row" style="padding-top: 20px">
+                            <div class="col-md-6">
+                                <p><strong>기종:</strong> <span id="dev_model"></span></p>
+                                <p><strong>OS:</strong> <span id="os"></span></p>
+                                <p><strong>언어:</strong> <span id="language"></span></p>
+                                <p><strong>DBMS:</strong> <span id="dbms"></span></p>
+                                <p><strong>TOOL:</strong> <span id="tool"></span></p>
+                                <p><strong>WAS/통신:</strong> <span id="WAS"></span></p>
+                                <p><strong>기타:</strong> <span id="other"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" id="deleteAssignBtn">삭제</button>
+                </div>
+                <div class="col-md-11">
+                    <button type="button" class="btn btn-success" id="#">엑셀</button>
+                    <button type="button" class="btn btn-primary" id="editAssignBtn">수정</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
+<!-- footer -->
+<div class="content" style="padding-top: 40px">
+    <div th:replace="footer :: footer"></div>
+</div>
+
+<script th:inline="javascript">
+    $(document).ready(function() {
+        updateAllTasks();
+    });
+
+    var currentPage = 1;
+    var itemsPerPage = 15;
+    var tasks = /*[[${tasks}]]*/ [];
+    var dev = /*[[${dev}]]*/ []; // dev 데이터 추가
+
+    function updateAllTasks() {
+        // Fetch and display all tasks
+        tasks = /*[[${tasks}]]*/ [];
+        dev = /*[[${dev}]]*/ [];
+        console.log("tasks :",tasks);
+        console.log("dev:",dev);
+        displayTasks();
+        setupPagination();
+    }
+
+    function displayTasks() {
+        var tbody = document.getElementById("assignTableBody");
+        tbody.innerHTML = "";
+
+        var start = (currentPage - 1) * itemsPerPage;
+        var end = start + itemsPerPage;
+        var paginatedTasks = tasks.slice(start, end);
+
+        paginatedTasks.forEach(function(task) {
+            var tr = document.createElement("tr");
+            tr.innerHTML = "<td></td>" +
+                           "<td style='display: none;'>" + task.pm_code + "</td>" +
+                           "<td>" + task.pm_name + "</td>" +
+                           "<td>" + task.pm_nori_manager + "</td>" +
+                           "<td>" + task.pm_nori_bu + "</td>" +
+                           "<td style='display: none;'>" + task.pm_create_date + "</td>" +
+                           "<td style='display: none;'>" + task.pm_manager + "</td>" +
+                           "<td style='display: none;'>" + task.pm_bu + "</td>" +
+                           "<td>" + task.pm_business + "</td>" +
+                           "<td style='display: none;'>" + task.pm_price + "</td>" +
+                           "<td style='display: none;'>" + task.pm_workload + "</td>" +
+                           "<td style='display: none;'>" + task.pm_full + "</td>" +
+                           "<td style='display: none;'>" + task.pm_part + "</td>" +
+                           "<td style='display: none;'>" + task.pm_suggest_date + "</td>" +
+                           "<td>" + task.pm_start_date + " ~ " + task.pm_end_date + "</td>" +
+                           "<td style='display: none;'>" + task.pm_work_date + "</td>" +
+                           //"<td>" + task.pm_work_date + "</td>" +
+                           "<td>" + task.pm_status + "</td>" +
+                           "<td style='display: none;'>" + task.pm_outline + "</td>" +
+                           "<td style='display: none;'>" + task.pm_bego + "</td>" +
+                           "<td style='display: none;'>" + task.pm_file + "</td>" +
+                           "<td style='display: none;'>" + task.pm_confirmed + "</td>" +
+                           "<td style='display: none;'>" + task.pm_save_id + "</td>" +
+                           "<td style='display: none;'>" + task.pm_save_sa + "</td>" +
+                           "<td style='display: none;'>" + task.pm_save_name + "</td>" +
+                           "<td style='display: none;'>" + task.pm_file_path + "</td>";
+
+            tr.onclick = function() {
+                showModal(task);
+            };
+            tbody.appendChild(tr);
+        });
+    }
+
+    function setupPagination() {
+        var totalPages = Math.ceil(tasks.length / itemsPerPage);
+        var paginationControls = document.getElementById("paginationControls");
+        paginationControls.innerHTML = "";
+
+        for (var i = 1; i <= totalPages; i++) {
+            var li = document.createElement("li");
+            li.className = (i === currentPage) ? "active" : "";
+            li.innerHTML = "<a href='#'>" + i + "</a>";
+            li.onclick = (function(page) {
+                return function() {
+                    currentPage = page;
+                    displayTasks();
+                    setupPagination();
+                };
+            })(i);
+            paginationControls.appendChild(li);
+        }
+    }
+
+    function showModal(task) {
+        // Fill the modal with task data
+        $('#pm_code').text(task.pm_code);
+        $('#pm_name').text(task.pm_name);
+        $('#pm_nori_manager').text(task.pm_nori_manager);
+        $('#pm_nori_bu').text(task.pm_nori_bu);
+        $('#pm_create_date').text(task.pm_create_date);
+        $('#pm_manager').text(task.pm_manager);
+        $('#pm_bu').text(task.pm_bu);
+        $('#pm_business').text(task.pm_business);
+        $('#pm_price').text(task.pm_price);
+        $('#pm_workload').text(task.pm_workload);
+        $('#pm_full').text(task.pm_full);
+        $('#pm_part').text(task.pm_part);
+        $('#pm_suggest_date').text(task.pm_suggest_date);
+        $('#pm_start_date').text(task.pm_start_date);
+        $('#pm_end_date').text(task.pm_end_date);
+        $('#pm_work_date').text(task.pm_work_date);
+        $('#pm_status').text(task.pm_status);
+        $('#pm_outline').text(task.pm_outline);
+        $('#pm_bego').text(task.pm_bego);
+        $('#pm_file').text(task.pm_file);
+        $('#pm_confirmed').text(task.pm_confirmed);
+        $('#modalPmSaveId').text(task.pm_save_id);
+        $('#modalPmSaveSa').text(task.pm_save_sa);
+        $('#modalPmSaveName').text(task.pm_save_name);
+        $('#pm_filePath').text(task.pm_file_path);
+        
+        // 모달 제목 설정
+        $('.modal-title').text(task.pm_name);
+        
+        // Filter dev data for the current task
+        var filteredDev = dev.filter(function(environment) {
+            return environment.pm_code === task.pm_code;
+        });
+
+        // Fill the modal with dev environment data
+        var devHtml = "";
+        filteredDev.forEach(function(environment) {
+            $('#dev_model').text(environment.dev_model);
+            $('#os').text(environment.os);
+            $('#language').text(environment.language);
+            $('#dbms').text(environment.dbms);
+            $('#tool').text(environment.tool);
+            $('#WAS').text(environment.was);
+            $('#other').text(environment.other);
+        });
+
+        $('#assignModal').modal('show');
+    }
+
+    $('#deleteAssignBtn').click(function() {
+        // 모달에서 pm_code 값을 가져옴
+        var pmCode = $('#pm_code').text();
+
+        // 확인 다이얼로그 표시
+        if (confirm('정말로 이 과제를 삭제하시겠습니까?')) {
+            // 삭제 기능 수행을 위해 AJAX 요청 보냄
+            $.ajax({
+                type: 'DELETE',
+                url: '/deleteTask',
+                data: {
+                    pm_code: pmCode
+                },
+                success: function(response) {
+                    // 성공적으로 삭제된 경우
+                    alert('과제가 성공적으로 삭제되었습니다.');
+                    // 페이지 다시 로드
+                    window.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    // 삭제 실패한 경우
+                    alert('과제 삭제 중 오류가 발생했습니다.');
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+    });
+
+    $('#editAssignBtn').click(function() {
+        var pmCode = $("#pm_code").text();
+        console.log("Edit button clicked, assign number:", pmCode);
+
+        var form = $('<form></form>');
+        form.attr("method", "get");
+        form.attr("action", "/getTaskInfo/" + pmCode);
+
+        $("body").append(form);
+        form.submit();
+    });
+</script>
 </html>

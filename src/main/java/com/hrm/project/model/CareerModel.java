@@ -10,7 +10,7 @@ public class CareerModel {
     private String department;
     private Date date_join;
     private Date date_leave;
-    private float work_period;
+    private int work_period;
     private String final_rank;
     private String work_info;
 
@@ -54,11 +54,11 @@ public class CareerModel {
         this.date_leave = date_leave;
     }
 
-    public float getWork_period() {
+    public int getWork_period() {
         return this.work_period;
     }
 
-    public void setWork_period(float work_period) {
+    public void setWork_period(int work_period) {
         this.work_period = work_period;
     }
 

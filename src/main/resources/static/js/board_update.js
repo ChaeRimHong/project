@@ -59,8 +59,6 @@
             document.getElementById("address_2").addEventListener("input", combineAddresses);
         });
 
-
-
 // select 박스 선택시 미리보기 안보이게
 $(document).ready(function() {
     $('select').on('mousedown', function() {
@@ -68,160 +66,65 @@ $(document).ready(function() {
     });
 });
 
-// // 사진 미리보기
-// function previewImage(event) {
-//     console.log("js script");
-//     const input_img = event.target;
-//     const file_img = input_img.files[0];
-//     const preview_img = document.getElementById('preview_img');
-//     const reader_img = new FileReader();
-//     reader_img.onload = function() {
-//         preview_img.src = reader_img.result;
-//     }
-//     reader_img.readAsDataURL(file_img);
-// }
-// function uploadFile(file, callback) {
-//     const formData = new FormData();
-//     const empInput = document.getElementById('emp_num');
-//     const empValue = empInput ? empInput.value : '';
+// 사진 미리보기
+    function previewImage(event) {
+        const input_img = event.target;
+        const file_img = input_img.files[0];
+        const preview_img = document.getElementById('preview_img');
 
-//     formData.append('file', file);
-//     formData.append('emp_num', empValue);
-//     const xhr = new XMLHttpRequest();
-//     xhr.open('POST', '/upload');
-//     xhr.onload = function() {
-//         if (xhr.status === 200) {
-//             alert('파일이 성공적으로 업로드되었습니다.');
-//             if (callback) {
-//                 callback(); // 업로드가 성공하면 콜백 함수 호출
-//             }
-//         } else {
-//             alert('파일 업로드에 실패했습니다.');
-//         }
-//     };
-//     xhr.onerror = function() {
-//         console.error('파일 업로드 중 오류 발생:', xhr.statusText);
-//         alert('파일 업로드 중 오류가 발생했습니다.');
-//     };
-//     xhr.send(formData);
-// }
+        const reader_img = new FileReader();
+        reader_img.onload = function() {
+            preview_img.src = reader_img.result;
+        }
+        reader_img.readAsDataURL(file_img);
+    }
 
-// $(document).ready(function() {
-//     $("#saveButton").click(function(event) {
-//         event.preventDefault();
-//         event.stopPropagation();
-    
-//         var fileInput = document.getElementById('fileInput');
-//         if (fileInput.files.length > 0) {
-//             // 파일이 선택된 경우 파일을 먼저 업로드하고, 업로드가 완료되면 데이터를 저장합니다.
-//             uploadFile(fileInput.files[0], saveDataToServer);
-//         } else {
-//             // 파일이 선택되지 않은 경우 바로 데이터를 저장합니다.
-//             alert('파일을 선택해주세요.');
-//             saveDataToServer();
-//         }
-//     });
-// });
-
-// $("#saveButton").click(function() {
-//     saveDataToServer();
-// });
-
-// // 파일 업로드 함수, 완료 후 콜백 함수 호출
-// function uploadFile(file, callback) {
-//     var formData = new FormData();
-//     var empInput = document.getElementById('emp_num');
-//     var empValue = empInput ? empInput.value : '';
-//     formData.append('file', file);
-//     formData.append('emp_num', empValue);
-//     var xhr = new XMLHttpRequest();
-//     xhr.open('POST', '/upload');
-//     xhr.onload = function() {
-//         if (xhr.status === 200) {
-//             alert('파일이 성공적으로 업로드되었습니다.');
-//             if (typeof callback === 'function') {
-//                 callback();
-//             }
-//         } else {
-//             alert('파일 업로드에 실패했습니다.');
-//         }
-//     };
-//     xhr.onerror = function() {
-//         console.error('파일 업로드 중 오류 발생:', xhr.statusText);
-//         alert('파일 업로드 중 오류가 발생했습니다.');
-//     };
-//     xhr.send(formData);
-// }
-
-$("#saveButton").click(function() {
-    saveDataToServer();
+// 저장 버튼에 이벤트 처리 함수 연결
+$("#updateButton").click(function() {
+    updateDataToServer();
 });
 
-// 파일 업로드 후 데이터 저장 함수
-function uploadFileAndSaveData() {
-    var fileInput = document.getElementById('fileInput');
-    if (fileInput.files.length > 0) {
-        var file = fileInput.files[0];
-        var formData = new FormData();
-        var empInput = document.getElementById('emp_num');
-        var empValue = empInput ? empInput.value : '';
-        formData.append('file', file);
-        formData.append('emp_num', empValue);
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/upload');
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                alert('파일이 성공적으로 업로드되었습니다.');
-                // 파일 업로드가 완료되면 데이터를 저장합니다.
-                saveDataToServer();
-            } else {
-                alert('파일 업로드에 실패했습니다.');
-            }
-        };
-        xhr.onerror = function() {
-            console.error('파일 업로드 중 오류 발생:', xhr.statusText);
-            alert('파일 업로드 중 오류가 발생했습니다.');
-        };
-        xhr.send(formData);
-    } else {
-        // 파일이 선택되지 않은 경우 바로 데이터를 저장합니다.
-        saveDataToServer();
-    }
-}
-
-// 데이터 저장 함수
-function saveDataToServer() {
+// 저장
+function updateDataToServer() {
+    // 각 테이블의 데이터를 수집하여 JavaScript 객체로 만듭니다.
     var tableData = {};
+
     // main_table 데이터 수집
     tableData.main = {};
-    $('#myInput_main .row').each(function() {
+    $('#myInput_main .row').each(function(){
         var rowData = {
             emp_num: $(this).find('input[name="emp_num"]').val(),
             name_kor: $(this).find('input[name="name_kor"]').val(),
             name_eng: $(this).find('input[name="name_eng"]').val(),
             reg_num: $(this).find('input[name="reg_num"]').val(),
-            pic: $(this).find('input[name="pic"]').val(),
+            // pic: $(this).find('input[name="pic"]').val(),
             age: $(this).find('input[name="age"]').val(),
             phone: $(this).find('input[name="phone"]').val(),
-            mail: $(this).find('input[name="mail"]').val(),
+            mail: $(this).find('#email-domain-select option:selected').val(),
             address: $(this).find('input[name="address"]').val(),
             address_num: $(this).find('input[name="address_num"]').val(),
-            dept_biz: $(this).find('input[name="dept_biz"]').val(),
-            dept_group: $(this).find('input[name="dept_group"]').val(),
+            dept_biz: $(this).find('#businessUnit option:selected').val(),
+            dept_group: $(this).find('#department option:selected').val(),
             date_join: $(this).find('input[name="date_join"]').val(),
-            emp_rank: $(this).find('input[name="emp_rank"]').val(),
-            work_pos: $(this).find('input[name="work_pos"]').val(),
-            position: $(this).find('input[name="position"]').val(),
+            emp_rank: $(this).find('#emp_rank_select option:selected').val(),
+            work_pos: $(this).find('#emp_position_select option:selected').val(),
+            position: $(this).find('#position option:selected').val(),
             salary: $(this).find('input[name="salary"]').val(),
-            last_edu: $(this).find('input[name="last_edu"]').val(),
-            military: $(this).find('input[name="military"]').val(),
-            merry: $(this).find('input[name="merry"]').val(),
+            last_edu: $(this).find('#last_edu option:selected').val(),
+            military: $(this).find('#military option:selected').val(),
+            merry: $(this).find('#marry option:selected').val(),
             height: $(this).find('input[name="height"]').val(),
             weight: $(this).find('input[name="weight"]').val(),
             gender: $(this).find('input[name="gender"]').val()
         };
         tableData.main = rowData;
-    });
+    })
+    console.log("dept_biz = "+tableData.main.dept_biz);
+    console.log("dept_group = "+tableData.main.dept_group);
+    console.log("emp_rank = "+tableData.main.emp_rank);
+    console.log("work_pos = "+tableData.main.work_pos);
+    console.log("position = "+tableData.main.position);
+
     // 경력 테이블 데이터 수집
     tableData.career = [];
     $('#myTable_car tbody tr').each(function() {
@@ -236,6 +139,7 @@ function saveDataToServer() {
         };
         tableData.career.push(rowData);
     });
+
     // 학력 테이블 데이터 수집
     tableData.education = [];
     $('#myTable_edu tbody tr').each(function() {
@@ -249,6 +153,7 @@ function saveDataToServer() {
         };
         tableData.education.push(rowData);
     });
+
     // 기술사항 테이블 데이터 수집
     tableData.technical = [];
     $('#myTable_tec tbody tr').each(function() {
@@ -259,6 +164,7 @@ function saveDataToServer() {
         };
         tableData.technical.push(rowData);
     });
+
     // 가족관계 테이블 데이터 수집
     tableData.family = [];
     $('#myTable_fam tbody tr').each(function() {
@@ -270,6 +176,7 @@ function saveDataToServer() {
         };
         tableData.family.push(rowData);
     });
+
     // 자격증 테이블 데이터 수집
     tableData.certificate = [];
     $('#myTable_lic tbody tr').each(function() {
@@ -279,6 +186,7 @@ function saveDataToServer() {
         };
         tableData.certificate.push(rowData);
     });
+
     // 교육이수 테이블 데이터 수집
     tableData.educationCompletion = [];
     $('#myTable_ec tbody tr').each(function() {
@@ -290,6 +198,7 @@ function saveDataToServer() {
         };
         tableData.educationCompletion.push(rowData);
     });
+
     // 상벌 테이블 데이터 수집
     tableData.rewardPunishment = [];
     $('#myTable_rp tbody tr').each(function() {
@@ -302,6 +211,7 @@ function saveDataToServer() {
         };
         tableData.rewardPunishment.push(rowData);
     });
+
     // 직급/호봉 테이블 데이터 수집
     tableData.rankSalary = [];
     $('#myTable_rs tbody tr').each(function() {
@@ -312,6 +222,7 @@ function saveDataToServer() {
         };
         tableData.rankSalary.push(rowData);
     });
+
     // 과제현황 테이블 데이터 수집
     tableData.projectStatus = [];
     $('#myTable_pm tbody tr').each(function() {
@@ -324,42 +235,38 @@ function saveDataToServer() {
         };
         tableData.projectStatus.push(rowData);
     });
+
+        // POST 요청 보내기
+        $.ajax({
+            url: '/employee/update',
+            method: 'POST',
+            data: JSON.stringify(requestData), // 수집한 데이터를 JSON 형식으로 변환하여 전송
+            contentType: 'application/json', // 전송하는 데이터의 형식을 JSON으로 지정
+            success: function(response) {
+                // 성공적으로 요청이 완료되었을 때 처리하는 로직
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                // 요청이 실패했을 때 처리하는 로직
+                console.error(error);
+            }
+        });
+
     // 서버로 데이터를 전송합니다.
     $.ajax({
-        url: '/employee/add', // 서버의 엔드포인트 URL을 입력합니다.
+        url: '/employee/update', // 서버의 엔드포인트 URL을 입력합니다.
         method: 'POST',
-        data: JSON.stringify(tableData),
+        data: tableData,
         contentType: 'application/json',
         success: function(response) {
             // 서버로부터의 응답을 처리합니다.
             console.log(response);
+            window.location.href = '/main';
         },
         error: function(xhr, status, error) {
             // 오류가 발생한 경우 처리합니다.
             console.error(error);
         }
     });
-    // 파일을 업로드합니다.
-    // if (fileInput.files.length > 0) {
-    //     var file = fileInput.files[0];
-    //     var formData = new FormData();
-    //     var empInput = document.getElementById('emp_num');
-    //     var empValue = empInput ? empInput.value : '';
-    //     formData.append('file', file);
-    //     formData.append('emp_num', empValue);
-    //     var xhr = new XMLHttpRequest();
-    //     xhr.open('POST', '/upload');
-    //     xhr.onload = function() {
-    //         if (xhr.status === 200) {
-    //             alert('파일이 성공적으로 업로드되었습니다.');
-    //         } else {
-    //             alert('파일 업로드에 실패했습니다.');
-    //         }
-    //     };
-    //     xhr.onerror = function() {
-    //         console.error('파일 업로드 중 오류 발생:', xhr.statusText);
-    //         alert('파일 업로드 중 오류가 발생했습니다.');
-    //     };
-    //     xhr.send(formData);
-    // }
+    
 }

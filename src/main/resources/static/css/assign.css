@@ -1,4 +1,8 @@
-
+        .table-hover tbody tr:hover {
+            cursor: pointer;
+            background-color: #f5f5f5;
+        }
+        
 /* Remove the navbar's default margin-bottom and rounded borders */ 
 .navbar {
   margin-bottom: 0;
@@ -57,11 +61,3 @@ td {
    width : auto;
     white-space: nowrap; /* 셀 내용이 한 줄에 표시되도록 설정 */
   }
-
-.scrollable {
-overflow-y: auto; /* 세로 스크롤 활성화 */
-padding-bottom: 20px;    
-/* overflow-x: auto;  세로 스크롤 활성화 */
-/*max-height: 600px;  스크롤 가능한 최대 높이 */
-
-}
